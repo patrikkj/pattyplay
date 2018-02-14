@@ -1,0 +1,134 @@
+/* MAIN MENU AND TIC TAC TOE */
+
+.backgroundColor {
+	-fx-background-color: #202020;
+}
+
+.menuColor{
+	-fx-background-color: #202020;
+}
+
+.textColor {
+	-fx-text-fill: #8E8E8E;
+}
+
+.separatorColor {
+	-fx-opacity: 0.25;
+}
+
+.rootTransparency {
+    -fx-background-color: transparent;
+}
+
+.buttonHoverColor:hover {
+	-fx-background-color: #303030;
+}
+
+.tileHoverColor:hover {
+		-fx-background-color: #242424;
+}
+
+
+/* SUDOKU */
+
+/* REGULAR TILE */
+#sudokuTile {
+	-fx-background-color: #202020;
+	-fx-background-radius: 0;
+
+	-fx-font: normal 15pt "Times New Roman";
+	-fx-text-fill: #5E5E5E;
+	
+	-fx-border-color: #272727;
+	-fx-border-width: 1;
+} 
+#sudokuTile:focused {
+	-fx-background-color: #999900;
+	
+	-fx-font: bold 15pt "Times New Roman";
+	-fx-text-fill: #151515;
+
+	-fx-effect: innershadow( three-pass-box, rgba( 20, 20, 0, 1 ), 40, 0, 0, 0 ); 
+} 
+#sudokuTile:hover {
+	 -fx-effect: innershadow( three-pass-box, rgba( 100, 100, 0, 1 ), 40, 0, 0, 0 );
+} 
+#sudokuTile:focused:hover {
+	-fx-effect: innershadow( three-pass-box, rgba( 40, 40, 0, 1 ), 40, 0, 0, 0 ); 
+}
+
+
+
+/* PERMANENT TILE */
+#sudokuTilePermanent {
+	-fx-background-color: #202020;
+	-fx-background-radius: 0;
+	
+	-fx-font: bold 15pt "Times New Roman";
+	-fx-text-fill: #C3C3C3;
+	
+	-fx-border-color: #272727;
+	-fx-border-width: 1;
+}
+
+#sudokuTilePermanent:hover {
+	 -fx-effect: innershadow( three-pass-box, rgba( 140, 70, 0, 1 ), 40, 0, 0, 0 );
+}
+#sudokuTilePermanent:focused {
+	 -fx-effect: innershadow( three-pass-box, rgba( 140, 70, 0, 1 ), 40, 0, 0, 0 );
+}
+
+/* MARKED TILE */
+#sudokuTileMarked {
+	-fx-background-color: #202020;
+	-fx-background-radius: 0;
+	
+	-fx-font: normal 15pt "Times New Roman";
+	-fx-text-fill: #5E5E5E;
+	
+	-fx-border-color: #272727;
+	-fx-border-width: 1;
+	
+	-fx-effect: innershadow( three-pass-box, rgba( 120, 20, 20, 1 ), 40, 0, 0, 0 );
+}
+#sudokuTileMarked:hover {
+	-fx-effect: innershadow( three-pass-box, rgba( 120, 40, 40 1 ), 40, 0, 0, 0 );	
+}
+#sudokuTileMarked:focused {
+	-fx-background-color: #BB0000;
+
+	-fx-font: bold 15pt "Times New Roman";
+	-fx-text-fill: #101010;	
+	
+	-fx-effect: innershadow( three-pass-box, rgba( 20, 20, 0, 1 ), 40, 0, 0, 0 );
+}
+#sudokuTileMarked:focused:hover {
+	-fx-effect: innershadow( three-pass-box, rgba( 40, 40, 0, 1 ), 40, 0, 0, 0 );
+}
+ 
+
+#sudokuBlock {
+	-fx-border-color: #373737;
+	-fx-border-width: 2;
+	-fx-border-insets: -1;
+	
+}
+
+#sudokuGridOutline {
+	-fx-border-color: #202020;
+	-fx-border-width: 6;
+	-fx-border-insets: -4;
+}
+
+#sudokuGrid {
+	-fx-background-color: #303030;
+}
+
+/* DIFFICULTY TOGGLE */
+#diff0:hover { -fx-background-color: #004000; }
+#diff1:hover { -fx-background-color: #404000; }
+#diff2:hover { -fx-background-color: #603000; }
+#diff3:hover { -fx-background-color: #500000; }
+
+
+

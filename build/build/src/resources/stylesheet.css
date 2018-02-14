@@ -1,0 +1,125 @@
+/* Main menu and Tic Tac Toe */
+
+.backgroundColor {
+	-fx-background-color: #202020;
+}
+
+.menuColor{
+	-fx-background-color: #202020;
+}
+
+.textColor {
+	-fx-text-fill: #8E8E8E;
+}
+
+.separatorColor {
+	-fx-opacity: 0.25;
+}
+
+.rootTransparency {
+    -fx-background-color: transparent;
+}
+
+.buttonHoverColor:hover {
+	-fx-background-color: #303030;
+}
+
+.tileHoverColor:hover {
+		-fx-background-color: #242424;
+}
+
+
+/* SUDOKU */
+
+#sudokuTile {
+	-fx-font: normal 15pt "Times New Roman";
+	-fx-text-fill: #656565;
+	-fx-background-color: #202020;
+	-fx-background-radius: 0;
+	
+	-fx-border-color: #272727;
+	-fx-border-width: 1;
+	
+}
+#sudokuTile:focused {
+	-fx-background-color: #999900;
+	-fx-effect: innershadow( three-pass-box, rgba( 20, 20, 0, 1 ), 37, 0, 0, 0 ); 
+	-fx-text-fill: #151515;
+}
+#sudokuTile:hover {
+	 -fx-effect: innershadow( three-pass-box, rgba( 60, 60, 0, 1 ), 35, 0, 0, 0 );
+}
+#sudokuTile:focused:hover {
+	-fx-effect: innershadow( three-pass-box, rgba( 40, 40, 0, 1 ), 37, 0, 0, 0 ); 
+}
+
+
+#sudokuTilePermanent {
+	-fx-background-color: #202020;
+	-fx-background-radius: 0;
+	
+	-fx-font: bold 15pt "Times New Roman";
+	-fx-text-fill: #C3C3C3;
+	
+	-fx-border-color: #272727;
+	-fx-border-width: 1;
+}
+
+#sudokuTilePermanent:hover {
+	 -fx-effect: innershadow( three-pass-box, rgba( 60, 60, 0, 1 ), 35, 0, 0, 0 );
+}
+#sudokuTilePermanent:focused {
+	-fx-effect: innershadow( three-pass-box, rgba( 45, 45, 45, 1 ), 37, 0, 0, 0 ); 
+}
+
+
+
+#sudokuTileMarked {
+	-fx-background-color: #202020;
+	-fx-background-radius: 0;
+	-fx-font: normal 15pt "Times New Roman";
+	-fx-text-fill: #8E8E8E;
+	
+	-fx-border-color: #272727;
+	-fx-border-width: 1;
+	-fx-effect: innershadow( three-pass-box, rgba( 60, 10, 10, 1 ), 37, 0, 0, 0 );
+	
+}
+#sudokuTileMarked:hover {
+	-fx-effect: innershadow( three-pass-box, rgba( 120, 40, 40, 1 ), 37, 0, 0, 0 );	
+}
+
+
+#sudokuTileMarked:focused {
+	-fx-effect: innershadow( three-pass-box, rgba( 90, 10, 10, 1 ), 37, 0, 0, 0 ); 
+
+}
+ 
+
+
+
+
+#sudokuBlock {
+	-fx-border-color: #373737;
+	-fx-border-width: 2;
+	-fx-border-insets: -1;
+	
+}
+
+#sudokuGridOutline {
+	-fx-border-color: #202020;
+	-fx-border-width: 6;
+	-fx-border-insets: -4;
+}
+
+#sudokuGrid {
+	-fx-background-color: #303030;
+}
+
+#diff0:hover { -fx-background-color: #002700; }
+#diff1:hover { -fx-background-color: #272700; }
+#diff2:hover { -fx-background-color: #400000; }
+#diff3:hover { -fx-background-color: #240000; }
+
+
+
