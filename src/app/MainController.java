@@ -5,16 +5,19 @@ import java.io.IOException;
 import com.jfoenix.controls.JFXButton;
 
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import sokoban.Game;
 import sokoban.SokobanController;
 
 public class MainController {
@@ -71,11 +74,21 @@ public class MainController {
     	//Initialize key listener for sokoban
     	if (GAME_ID == SOKOBAN_ID) controller.postInitialize();
     	
+    	//Remove key listener for sokoban if loading new module
+    	if (GAME_ID != SOKOBAN_ID) removeKeyListener();
+    	
     	//Fit submodule constraits to parent
     	AnchorPane.setTopAnchor(subModule, 0.0);
     	AnchorPane.setBottomAnchor(subModule, 0.0);
     	AnchorPane.setLeftAnchor(subModule, 0.0);
     	AnchorPane.setRightAnchor(subModule, 0.0);
+    }
+    
+    private void removeKeyListener() {
+    	rootPane.getScene().setOnKeyPressed(new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent event) {}
+		});
     }
     
     private void clearModules() {

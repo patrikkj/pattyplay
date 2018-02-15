@@ -9,6 +9,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
@@ -36,19 +37,25 @@ public class SokobanController {
 	//FXML References
 	@FXML StackPane rootPane;
 	@FXML AnchorPane subRootPane;
+	@FXML Label levelLabel;
+	@FXML Label movesLabel;
+	
 	
 	
 	//Initialize Game
 	public void initialize() {
 		//Set default level
-		level = 18;
-		System.out.println("Level: " +  level);
+		level = 1;
 		
 		//Initialize GUI
 		initializeGrid();
 		
+		//Initialize character
 		renderCharacter();
 		
+		//Set labels
+		levelLabel.setText(String.format("Level: %s", level));
+		movesLabel.setText(String.format("Moves: %s", game.getNumOfMoves()));
 	}
 	
 	//Initialize GUI
@@ -159,6 +166,10 @@ public class SokobanController {
 
 	//Update GUI
 	private void update() {
+		//Update labels
+		levelLabel.setText(String.format("Level: %s", level));
+		movesLabel.setText(String.format("Moves: %s", game.getNumOfMoves()));
+		
 		int[] playerCoords = game.getPlayerCoords();
 		
 		int minX = Math.max(playerCoords[0] - 2, 0);
@@ -244,8 +255,7 @@ public class SokobanController {
 	@FXML private void resetLevel() {
 		initializeGrid();		
 		renderCharacter();
-		System.out.println("Level: " +  level);
-		System.out.println("TileSize: " + tileSize);
+		update();
 	}
 	
 	
@@ -280,7 +290,7 @@ public class SokobanController {
 		double playerY = playerCoords[1];
 				
 		//Have fun :)
-		duration = (game.isFinished()) ? 600 : 300;
+		duration = (game.isFinished()) ? 900 : 300;
 			
 		//Transition properties
 		TranslateTransition translateTransition = new TranslateTransition();

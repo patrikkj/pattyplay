@@ -7,6 +7,7 @@ public class Game {
 	private Cell[][] grid;			//Game board
 	private int height, width;		//Grid dimensions
 	private int playerX, playerY;	//Player coordinates
+	private boolean finished;		//True if game is finished
 
 	//Directions
 	public static final int[] UP = {0, -1}, DOWN = {0, 1}, LEFT = {-1, 0}, RIGHT = {1, 0};
@@ -120,24 +121,24 @@ public class Game {
 	public boolean move(int[] direction) {
 		//Used to mess around when finished, have fun :)
 		if (isFinished()) {
-			movePlayer(direction);
+			movePlayer(direction, false);
 			return true;
 		}
 
-		//Break if move is invalid and game is not finished
+		//Break if move is invalid
 		if (!isValidMove(direction)) 
 			return false;
 		
 		//If adjacent cell is a block, push block and move player
 		if (getAdjacent(direction).isBlock()) {
 			pushBlock(direction);
-			movePlayer(direction);
+			movePlayer(direction, true);
 			return true;
 		}
 		
 		//If adjacent cell is empty, move player
 		else if (getAdjacent(direction).isEmpty()) {
-			movePlayer(direction);
+			movePlayer(direction, true);
 			return true;
 		}
 		
@@ -145,10 +146,12 @@ public class Game {
 	}
 	
 	//Moves player coordinates
-	public void movePlayer(int[] direction) {
+	public void movePlayer(int[] direction, boolean incrementMoveCount) {
 		playerX += direction[0];
 		playerY += direction[1];
-		numOfMoves++;
+		
+		if (incrementMoveCount) 
+			numOfMoves++;
 	}
 	
 	
@@ -171,6 +174,11 @@ public class Game {
 	//Returns player coordinates
 	public int[] getPlayerCoords() {
 		return new int[] {playerX, playerY};
+	}
+	
+	//Returns number of player moves
+	public int getNumOfMoves() {
+		return numOfMoves;
 	}
 	
 	//Getters for board size
