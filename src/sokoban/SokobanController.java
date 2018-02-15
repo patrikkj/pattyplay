@@ -22,6 +22,7 @@ public class SokobanController {
 	private Game game;
 	private Scene scene;
 	private GridPane gridPane;
+	private double duration;
 	private double tileWidth;
 	private double tileHeight;
 	private double tileSize;
@@ -40,7 +41,8 @@ public class SokobanController {
 	//Initialize Game
 	public void initialize() {
 		//Set default level
-		level = 1;
+		level = 18;
+		System.out.println("Level: " +  level);
 		
 		//Initialize GUI
 		initializeGrid();
@@ -109,22 +111,18 @@ public class SokobanController {
 				//Check directions
 				switch (key) {
 				case "Up":
-					System.out.println("Up");
 					if (game.move(Game.UP))
 						moveCharacter(Game.UP);
 					break;
 				case "Down":
-					System.out.println("Down");
 					if (game.move(Game.DOWN))
 						moveCharacter(Game.DOWN);
 					break;
 				case "Left":
-					System.out.println("Left");
 					if (game.move(Game.LEFT))
 						moveCharacter(Game.LEFT);
 					break;
 				case "Right":
-					System.out.println("Right");
 					if (game.move(Game.RIGHT))
 						moveCharacter(Game.RIGHT);
 					break;
@@ -132,10 +130,7 @@ public class SokobanController {
 					System.out.println("Reset");
 					resetLevel();
 				}
-				
-				if (game.isFinished())
-					System.out.println("Congratulations!!");
-					
+
 				//Update GUI after move
 				update();				
 		}});
@@ -214,18 +209,19 @@ public class SokobanController {
 	
 	//Load previous level
 	@FXML private void previousLevel() {
-//		level--;
-		System.out.println("...");
+		level--;
+		resetLevel();
 	}
 	
 	//Load next level
 	@FXML private void nextLevel() {
-//		level++;
-		System.out.println("...");
+		level++;
+		resetLevel();
 	}
 	
 	//Reset current level
 	@FXML private void resetLevel() {
+		System.out.println("Level: " +  level);
 		initializeGrid();
 		
 		renderCharacter();
@@ -261,15 +257,16 @@ public class SokobanController {
 		int[] playerCoords = game.getPlayerCoords();
 		double playerX = playerCoords[0];
 		double playerY = playerCoords[1];
-		
-		TranslateTransition translateTransition = new TranslateTransition();
-		
+				
+		//Have fun :)
+		duration = (game.isFinished()) ? 600 : 300;
+			
 		//Transition properties
-		double duration = 300;
+		TranslateTransition translateTransition = new TranslateTransition();
 		translateTransition.setNode(character);
-		translateTransition.setInterpolator(Interpolator.EASE_BOTH);
 		translateTransition.setToX(playerX * tileSize);
 		translateTransition.setToY(playerY * tileSize);
+		translateTransition.setInterpolator(Interpolator.EASE_BOTH);
 		translateTransition.setDuration(Duration.millis(duration));
 		
 		//Play Transition
@@ -323,14 +320,11 @@ public class SokobanController {
 		
 		timeline.play();	
 		
-		System.out.println(String.format("Player coords: %s, %s \n %s, %s", playerX, playerY, character.getTranslateX(), character.getTranslateY()));
+		System.out.println(String.format("Player coords: [%s, %s] Pixel coords: [%s, %s]", playerX, playerY, character.getTranslateX(), character.getTranslateY()));
 	}
 
 	
 	//Handlers
-    
-	
-	//
 	@FXML
     private void handleLoadClick(ActionEvent event) {
     }

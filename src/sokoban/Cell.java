@@ -6,7 +6,7 @@ public class Cell {
 	private int x, y;			//X and Y coordinates relative to grid
 
 	//Cell types
-	public static final char NONE = '_', EMPTY = ' ', PLAYER = '@', WALL = '#', BLOCK = '$', ENDPOINT = '.', BLOCK_ENDPOINT = '*';
+	public static final char NONE = '_', EMPTY = ' ', PLAYER = '@', PLAYER_ENDPOINT = '+', WALL = '#', BLOCK = '$', ENDPOINT = '.', BLOCK_ENDPOINT = '*';
 	
 	//Properties				NOTE: Remember to update isEmpty() and toString() when adding new properties
 	private boolean none;		//True if null block

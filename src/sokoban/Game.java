@@ -3,6 +3,7 @@ package sokoban;
 
 public class Game {
 	//Instance vars
+	private int numOfMoves;			//Number of moves
 	private Cell[][] grid;			//Game board
 	private int height, width;		//Grid dimensions
 	private int playerX, playerY;	//Player coordinates
@@ -31,9 +32,7 @@ public class Game {
 	public Game(char[][] charGrid) {
 		//Retrive grid dimensions
 		height = charGrid.length;
-		System.out.println("Height set to" + height);
 		width = charGrid[0].length;
-		System.out.println("Width set to" + width);
 		
 		//Initialize empty grid
 		grid = new Cell[height][width];
@@ -62,6 +61,11 @@ public class Game {
 					break;
 				case Cell.PLAYER:
 					grid[y][x] = new Cell(x, y, false, false, false);
+					playerX = x;
+					playerY = y;
+					break;
+				case Cell.PLAYER_ENDPOINT:
+					grid[y][x] = new Cell(x, y, false, false, true);
 					playerX = x;
 					playerY = y;
 					break;
@@ -114,7 +118,13 @@ public class Game {
 	
 	//Attempts to make a move in given direction
 	public boolean move(int[] direction) {
-		//Break if move is invalid
+		//Used to mess around when finished, have fun :)
+		if (isFinished()) {
+			movePlayer(direction);
+			return true;
+		}
+
+		//Break if move is invalid and game is not finished
 		if (!isValidMove(direction)) 
 			return false;
 		
@@ -138,6 +148,7 @@ public class Game {
 	public void movePlayer(int[] direction) {
 		playerX += direction[0];
 		playerY += direction[1];
+		numOfMoves++;
 	}
 	
 	
