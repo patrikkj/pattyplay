@@ -31,7 +31,7 @@
                         <String fx:value="buttonHoverColor" />
                      </styleClass>
                   </JFXButton>
-                  <Label fx:id="levelLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="textColor" stylesheets="@../../../../Patrik-Root/PattyPlay/src/resources/stylesheet.css" text="Level: 100" textAlignment="CENTER" HBox.hgrow="ALWAYS">
+                  <Label fx:id="levelLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="textColor" stylesheets="@../resources/stylesheet.css" text="Level: 100" textAlignment="CENTER" HBox.hgrow="ALWAYS">
                      <font>
                         <Font name="Gabriola" size="23.0" />
                      </font>
@@ -56,7 +56,7 @@
                         </SepiaTone>
                      </effect>
                   </Label>
-                  <Label fx:id="movesLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="95.0" styleClass="textColor" stylesheets="@../../../../Patrik-Root/PattyPlay/src/resources/stylesheet.css" text="Moves: 100" textAlignment="CENTER">
+                  <Label fx:id="movesLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="95.0" styleClass="textColor" stylesheets="@../resources/stylesheet.css" text="Moves: 100" textAlignment="CENTER">
                      <font>
                         <Font name="Gabriola" size="23.0" />
                      </font>
