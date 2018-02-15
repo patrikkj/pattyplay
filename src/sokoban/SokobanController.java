@@ -68,8 +68,29 @@ public class SokobanController {
 		tileWidth = subRootPane.getMinWidth() / tilesX;
 		tileHeight = subRootPane.getMinHeight() / tilesY;
 		tileSize = Math.round(Math.min(tileWidth, tileHeight));
-
-
+		
+		//Explicitly fix rounding errors :(
+		switch ((int) tileSize) {
+		case 21:
+			tileSize--;
+			break;
+		case 22:
+			tileSize++;
+			break;
+		case 25:
+			tileSize--;
+			break;
+		case 29:
+			tileSize--;
+			break;
+		case 33:
+			tileSize--;
+			break;
+		case 50:
+			tileSize++;
+			break;
+		}
+		
 		//Generate tiles
 		for (int y = 0; y < tilesY; y++)
 			for (int x = 0; x < tilesX; x++) {
@@ -221,10 +242,10 @@ public class SokobanController {
 	
 	//Reset current level
 	@FXML private void resetLevel() {
-		System.out.println("Level: " +  level);
-		initializeGrid();
-		
+		initializeGrid();		
 		renderCharacter();
+		System.out.println("Level: " +  level);
+		System.out.println("TileSize: " + tileSize);
 	}
 	
 	
