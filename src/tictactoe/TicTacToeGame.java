@@ -101,10 +101,11 @@ public class TicTacToeGame extends BoardGame<Character> {
 			if (getColumn(column).equals(winSeqX)  ||  getColumn(column).equals(winSeqO))
 				return true;
 		
-		//Check diagonals
+		//Check diagonals for player 1
 		if ((getElement(0, 0) == PLAYER_1)  &&  (getElement(1, 1) == PLAYER_1)  &&  (getElement(2, 2) == PLAYER_1)) return true;
 		if ((getElement(0, 2) == PLAYER_1)  &&  (getElement(1, 1) == PLAYER_1)  &&  (getElement(2, 0) == PLAYER_1)) return true;
 
+		//Check diagonals for player 2
 		if ((getElement(0, 0) == PLAYER_2)  &&  (getElement(1, 1) == PLAYER_2)  &&  (getElement(2, 2) == PLAYER_2)) return true;
 		if ((getElement(0, 2) == PLAYER_2)  &&  (getElement(1, 1) == PLAYER_2)  &&  (getElement(2, 0) == PLAYER_2)) return true;
 		

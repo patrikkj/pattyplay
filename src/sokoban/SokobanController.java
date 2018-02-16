@@ -290,7 +290,7 @@ public class SokobanController {
 		double playerY = playerCoords[1];
 				
 		//Have fun :)
-		duration = (game.isFinished()) ? 900 : 300;
+		duration = (game.isFinished()) ? 300 : 300;
 			
 		//Transition properties
 		TranslateTransition translateTransition = new TranslateTransition();
