@@ -1,6 +1,5 @@
 package sokoban;
 
-
 public class Game {
 	//Instance vars
 	private int numOfMoves;			//Number of moves
