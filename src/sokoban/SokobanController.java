@@ -7,6 +7,7 @@ import javafx.animation.TranslateTransition;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -14,8 +15,13 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.Border;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
 public class SokobanController {
@@ -44,6 +50,26 @@ public class SokobanController {
 	
 	//Initialize Game
 	public void initialize() {
+		
+		
+		
+		//Kan gjøre slik, må lage et nytt Background-objekt basert på et BackgroundFill-objekt
+		//Konstruktøren til et Background-objekt krever at du spesifiserer et BackgroundFill-objekt, 
+		//som lages ved å spesifisere en farge, radius og avstand fra kanten (insets) som skal fargelegges
+//		levelLabel.setBackground(new Background(new BackgroundFill(Color.DARKGRAY, CornerRadii.EMPTY, Insets.EMPTY)));
+		
+		//Kan gjøres slik hvis du vil fargelegge hele bakgrunnen til et objekt i en spesifik farge
+//		levelLabel.setBackground(new Background(new BackgroundFill(Color.DARKGRAY, null, null)));
+		
+		
+		//Bruker selv denne, hvor du spesifiserer fargen som et hexadesimal :)
+		String prevStyle = levelLabel.getStyle();
+		System.out.println("Prev style:" + prevStyle);
+		levelLabel.setStyle( prevStyle + "-fx-background-color: #FFFFFF");
+//		levelLabel.setsty
+		
+		
+		
 		//Set default level
 		level = 1;
 		
