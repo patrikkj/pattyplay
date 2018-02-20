@@ -6,15 +6,10 @@ import java.util.Arrays;
 //toConstructor() -> String ... for lagring :)
 
 //Tile type must be specified when inheriting class
-public class BoardGame<boardType> implements Cloneable {
+public class BoardGame<boardType> {
 	// Instance variables
 	private ArrayList<ArrayList<boardType>> board;
 
-	@Override
-	public Object clone() throws CloneNotSupportedException {
-		// TODO Auto-generated method stub
-		return super.clone();
-	}
 	
 	// Constructors
 	public BoardGame() {
@@ -206,7 +201,7 @@ public class BoardGame<boardType> implements Cloneable {
 
 		return outputStr.trim();
 	}
-
+	
 	public static void main(String[] args) {
 			BoardGame<String> board1 = new BoardGame<String>(2, 2, "Heiaa");
 			
@@ -256,5 +251,5 @@ public class BoardGame<boardType> implements Cloneable {
 	}
 	
 	
-
+	
 }

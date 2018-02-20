@@ -5,7 +5,6 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.TextField?>
 <?import javafx.scene.effect.Bloom?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -52,7 +51,6 @@
                         <String fx:value="buttonHoverColor" />
                      </styleClass>
                   </JFXButton>
-                  <TextField fx:id="textField" promptText="prompt text" />
                </children>
                <VBox.margin>
                   <Insets left="30.0" right="30.0" top="10.0" />

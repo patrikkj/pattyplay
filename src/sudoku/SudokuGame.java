@@ -82,7 +82,6 @@ public class SudokuGame extends BoardGame<SudokuCell> {
 		validateRow(row);
 		validateColumn(column);
 		validateBlock(row, column);
-	
 	}
 	
 	//Validates row and update cell alert

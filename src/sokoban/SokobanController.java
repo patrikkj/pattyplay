@@ -50,26 +50,6 @@ public class SokobanController {
 	
 	//Initialize Game
 	public void initialize() {
-		
-		
-		
-		//Kan gjøre slik, må lage et nytt Background-objekt basert på et BackgroundFill-objekt
-		//Konstruktøren til et Background-objekt krever at du spesifiserer et BackgroundFill-objekt, 
-		//som lages ved å spesifisere en farge, radius og avstand fra kanten (insets) som skal fargelegges
-//		levelLabel.setBackground(new Background(new BackgroundFill(Color.DARKGRAY, CornerRadii.EMPTY, Insets.EMPTY)));
-		
-		//Kan gjøres slik hvis du vil fargelegge hele bakgrunnen til et objekt i en spesifik farge
-//		levelLabel.setBackground(new Background(new BackgroundFill(Color.DARKGRAY, null, null)));
-		
-		
-		//Bruker selv denne, hvor du spesifiserer fargen som et hexadesimal :)
-		String prevStyle = levelLabel.getStyle();
-		System.out.println("Prev style:" + prevStyle);
-		levelLabel.setStyle( prevStyle + "-fx-background-color: #FFFFFF");
-//		levelLabel.setsty
-		
-		
-		
 		//Set default level
 		level = 1;
 		

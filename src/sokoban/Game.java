@@ -6,7 +6,6 @@ public class Game {
 	private Cell[][] grid;			//Game board
 	private int height, width;		//Grid dimensions
 	private int playerX, playerY;	//Player coordinates
-	private boolean finished;		//True if game is finished
 
 	//Directions
 	public static final int[] UP = {0, -1}, DOWN = {0, 1}, LEFT = {-1, 0}, RIGHT = {1, 0};
@@ -40,6 +39,8 @@ public class Game {
 		//Fill grid with corresponding cell
 		for (int y = 0; y < height; y++)
 			for (int x = 0; x < width; x++) {
+				
+				
 				switch (charGrid[y][x]) {
 				case Cell.NONE:
 					grid[y][x] = new Cell();
@@ -211,14 +212,6 @@ public class Game {
 	//Main
 	public static void main(String[] args) {
 		Game game1 = new Game(Levels.getLevel(1));
-		
-		
-		
-		
-		
-		
-		
-		
 		
 		game1.printGrid();
 	}
