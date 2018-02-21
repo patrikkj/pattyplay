@@ -32,7 +32,6 @@ public class TicTacToeController {
 	
 	//Initialization
 	@FXML private void initialize() {
-		
 		//Initialize game
 		game = new TicTacToeGame();
 		

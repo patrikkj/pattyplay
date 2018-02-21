@@ -4,6 +4,8 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -22,6 +24,7 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import javafx.util.Duration;
 
 public class SokobanController {
@@ -109,6 +112,12 @@ public class SokobanController {
 			for (int x = 0; x < tilesX; x++) {
 				//Initialize new tile
 				StackPane tile = new StackPane();
+				
+				ObservableValue<Double> tileSize = new ReadOnlyObjectWrapper<>(Math.min(scene.getHeight()/9, scene.getWidth()/9));
+
+				
+				
+				tile.prefHeightProperty().bind(tileSize);
 				
 				//Set identifier (scene.lookup("#id"))
 				tile.setId(String.format("Tile_%s_%s", x, y));
