@@ -112,13 +112,7 @@ public class SokobanController {
 			for (int x = 0; x < tilesX; x++) {
 				//Initialize new tile
 				StackPane tile = new StackPane();
-				
-				ObservableValue<Double> tileSize = new ReadOnlyObjectWrapper<>(Math.min(scene.getHeight()/9, scene.getWidth()/9));
-
-				
-				
-				tile.prefHeightProperty().bind(tileSize);
-				
+					
 				//Set identifier (scene.lookup("#id"))
 				tile.setId(String.format("Tile_%s_%s", x, y));
 
