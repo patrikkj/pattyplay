@@ -50,7 +50,6 @@ public class SokobanController {
 	@FXML Label movesLabel;
 	
 	
-	
 	//Initialize Game
 	public void initialize() {
 		//Set default level
@@ -144,35 +143,41 @@ public class SokobanController {
 			@Override
 			public void handle(KeyEvent event) {
 				String key = event.getCode().getName();
-				
+				System.out.println(key);
 				//Check directions
 				switch (key) {
 				case "Up":
-					if (game.move(Game.UP))
-						moveCharacter(Game.UP);
+					if (game.move(Direction.UP))
+						moveCharacter(Direction.UP);
 					break;
 				case "Down":
-					if (game.move(Game.DOWN))
-						moveCharacter(Game.DOWN);
+					if (game.move(Direction.DOWN))
+						moveCharacter(Direction.DOWN);
 					break;
 				case "Left":
-					if (game.move(Game.LEFT))
-						moveCharacter(Game.LEFT);
+					if (game.move(Direction.LEFT))
+						moveCharacter(Direction.LEFT);
 					break;
 				case "Right":
-					if (game.move(Game.RIGHT))
-						moveCharacter(Game.RIGHT);
+					if (game.move(Direction.RIGHT))
+						moveCharacter(Direction.RIGHT);
+					break;
+				case "Plus":
+					game.redo();
+					break;
+				case "Minus":
+					game.undo();
 					break;
 				case "R":
 					System.out.println("Reset");
 					resetLevel();
 				}
-
+				
 				//Update GUI after move
 				update();				
 		}});
 	}
-
+	
 	//Update GUI
 	private void update() {
 		//Update labels
@@ -283,15 +288,21 @@ public class SokobanController {
 	}
 	
 	//Character movement
-	private void moveCharacter(int[] direction) {
-		if (direction == Game.UP)
+	private void moveCharacter(Direction direction) {
+		switch (direction) {
+		case UP:
 			charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Back0.png")));
-		if (direction == Game.DOWN)
+			break;
+		case DOWN:
 			charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Front0.png")));
-		if (direction == Game.LEFT)
+			break;
+		case LEFT:
 			charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Left0.png")));
-		if (direction == Game.RIGHT)
+			break;
+		case RIGHT:
 			charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Right0.png")));
+			break;
+		}
 		
 		// Player coordinates
 		int[] playerCoords = game.getPlayerCoords();
@@ -314,7 +325,8 @@ public class SokobanController {
 		
 
 		Timeline timeline = new Timeline();
-		if (direction == Game.UP) {
+		switch (direction) {
+			case UP:
 			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration * 0.25),
 			        ae -> charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Back1.png")))));
 			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration * 0.5),
@@ -323,9 +335,9 @@ public class SokobanController {
 					ae -> charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Back1.png")))));
 			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration * 1),
 					ae -> charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Back2.png")))));
-		}
-		
-		else if (direction == Game.DOWN) {
+			break;
+			
+			case DOWN:
 			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration * 0.25),
 					ae -> charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Front1.png")))));
 			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration * 0.5),
@@ -334,9 +346,9 @@ public class SokobanController {
 					ae -> charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Front1.png")))));
 			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration * 1),
 					ae -> charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Front2.png")))));
-		}
+			break;
 		
-		else if (direction == Game.LEFT) {
+			case LEFT:
 			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration * 0.25),
 					ae -> charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Left1.png")))));
 			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration * 0.5),
@@ -345,9 +357,9 @@ public class SokobanController {
 					ae -> charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Left1.png")))));
 			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration * 1),
 					ae -> charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Left0.png")))));
-		}
-		
-		else if (direction == Game.RIGHT) {
+			break;
+
+			case RIGHT:
 			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration * 0.25),
 					ae -> charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Right1.png")))));
 			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration * 0.5),
@@ -356,10 +368,10 @@ public class SokobanController {
 					ae -> charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Right1.png")))));
 			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration * 1),
 					ae -> charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Right0.png")))));
+			break;
 		}
 		
 		timeline.play();	
-		
 		System.out.println(String.format("Player coords: [%s, %s] Pixel coords: [%s, %s]", playerX, playerY, character.getTranslateX(), character.getTranslateY()));
 	}
 

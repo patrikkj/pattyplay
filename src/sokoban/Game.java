@@ -1,15 +1,16 @@
 package sokoban;
 
+import java.util.Stack;
+
 public class Game {
 	//Instance vars
 	private int numOfMoves;			//Number of moves
 	private Cell[][] grid;			//Game board
 	private int height, width;		//Grid dimensions
 	private int playerX, playerY;	//Player coordinates
-
-	//Directions
-	public static final int[] UP = {0, -1}, DOWN = {0, 1}, LEFT = {-1, 0}, RIGHT = {1, 0};
 	
+	
+	private Stack<Direction> undoStack, redoStack;
 	
 	//Constructors
 	//Constructs grid of default cells
@@ -90,10 +91,10 @@ public class Game {
 		return true;
 	}
 	
-	private boolean isValidMove(int[] direction) {
+	private boolean isValidMove(Direction direction) {
 		//Check indices
-		int newX = playerX + direction[0];
-		int newY = playerY + direction[1];
+		int newX = playerX + direction.VALUE[0];
+		int newY = playerY + direction.VALUE[1];
 		if ((newX < 0)  ||  (newX >= width)) return false;
 		if ((newY < 0)  ||  (newY >= height)) return false;
 		
@@ -112,13 +113,13 @@ public class Game {
 	
 	//Actions
 	//Move block from initial cell to adjacent cell
-	private void pushBlock(int[] direction) {
+	private void pushBlock(Direction direction) {
 		getAdjacent(direction).setBlock(false);
 		getAdjacent2(direction).setBlock(true);
 	}
 	
 	//Attempts to make a move in given direction
-	public boolean move(int[] direction) {
+	public boolean move(Direction direction) {
 		//Used to mess around when finished, have fun :)
 		if (isFinished()) {
 			movePlayer(direction, false);
@@ -146,12 +147,24 @@ public class Game {
 	}
 	
 	//Moves player coordinates
-	public void movePlayer(int[] direction, boolean incrementMoveCount) {
-		playerX += direction[0];
-		playerY += direction[1];
+	public void movePlayer(Direction direction, boolean incrementMoveCount) {
+		playerX += direction.VALUE[0];
+		playerY += direction.VALUE[1];
 		
 		if (incrementMoveCount) 
 			numOfMoves++;
+	}
+	
+	
+	//Undo Actions
+	//Redo action if possible
+	public void redo() {
+		
+	}
+
+	//Undo action if possible
+	public void undo() {
+		
 	}
 	
 	
@@ -162,13 +175,13 @@ public class Game {
 	}
 	
 	//Returns cell at distance 1 in given direction relative to player coordinates
-	public Cell getAdjacent(int[] direction) {
-		return get(playerX + direction[0], playerY + direction[1]);
+	public Cell getAdjacent(Direction direction) {
+		return get(playerX + direction.VALUE[0], playerY + direction.VALUE[1]);
 	}
 	
 	//Returns cell at distance 2 in given direction relative to player coordinates
-	public Cell getAdjacent2(int[] direction) {
-		return get(playerX + 2*direction[0], playerY + 2*direction[1]);
+	public Cell getAdjacent2(Direction direction) {
+		return get(playerX + 2*direction.VALUE[0], playerY + 2*direction.VALUE[1]);
 	}
 	
 	//Returns player coordinates
@@ -214,5 +227,38 @@ public class Game {
 		Game game1 = new Game(Levels.getLevel(1));
 		
 		game1.printGrid();
+	}
+
+	
+	
+}
+
+enum Direction {
+	UP 		(new int[] {0, -1}),
+	DOWN 	(new int[] {0, 1}),
+	LEFT 	(new int[] {-1, 0}),
+	RIGHT 	(new int[] {1, 0});
+	
+	public final int[] VALUE;
+	
+	private Direction(int[] dirArr) {
+		this.VALUE = dirArr;
+	}
+	
+	// Return inversed direction
+	public Direction getInverse() {
+		switch (this) {
+		case UP:
+			return DOWN;
+		case DOWN:
+			return UP;
+		case LEFT:
+			return RIGHT;
+		case RIGHT:
+			return LEFT;
+		}
+		
+		// Never gonna happen bruh
+		return null;
 	}
 }

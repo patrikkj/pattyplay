@@ -31,7 +31,6 @@ public class MainController {
 	private StackPane tictactoeModule;
 	private StackPane sudokuModule;
 	private StackPane sokobanModule;
-
 	
 	//Controllers
 	private SokobanController controller;
@@ -61,7 +60,6 @@ public class MainController {
 		//Need reference to run key listener method after initialization
 		controller = loader.getController();
     }
-    
     
     private void initializeModule(Region subModule, int GAME_ID) {
     	//Retrive stage to re-adjust window size
