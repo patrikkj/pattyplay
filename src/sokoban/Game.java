@@ -1,78 +1,102 @@
 package sokoban;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Stack;
 
 public class Game {
-	//Instance vars
-	private int numOfMoves;			//Number of moves
-	private Cell[][] grid;			//Game board
-	private int height, width;		//Grid dimensions
-	private int playerX, playerY;	//Player coordinates
+	// Instance vars
+	private int numOfMoves;			// Number of moves
+	private Cell[][] grid;			// Game board
+	private int height, width;		// Grid dimensions
+	// Dynamic entries
+	private Player player;			// Game character
+	private Set<Block> blocks;		// List of blocks
+	// Move History
+	private Stack<Direction> undoStack; 
+	private Stack<Direction> redoStack;
+	
+	// Constants
+	public static final int ILLEGAL_MOVE = 0, PLAYER_MOVE = 1, PLAYER_BLOCK_MOVE = 2;
 	
 	
-	private Stack<Direction> undoStack, redoStack;
-	
-	//Constructors
-	//Constructs grid of default cells
+	// Constructors
+	/**
+	 * Constructs empty grid with specified dimensions.
+	 */
 	public Game(int width, int height) {
-		//Retrive grid dimensions
+		// Initialize Collections
+		blocks = new HashSet<>();
+		undoStack = new Stack<>();
+		redoStack = new Stack<>();
+		
+		// Retrive grid dimensions
 		this.width = width;
 		this.height = height;
 		
-		//Initialize empty grid
+		// Initialize empty grid
 		grid = new Cell[height][width];
 		
-		//Fill grid with default cell
+		// Fill grid with default cell
 		for (int y = 0; y < height; y++)
 			for (int x = 0; x < width; x++)
 				grid[y][x] = new Cell();
 	}
 	
-	//Constructs grid from input table of characters (sokoban.Levels)
+	/**
+	 * Constructs grid from input table of characters.
+	 * @param charGrid - grid of characters representing given level.
+	 * @see sokoban.Levels
+	 */
 	public Game(char[][] charGrid) {
-		//Retrive grid dimensions
+		// Initialize Collections
+		blocks = new HashSet<>();
+		undoStack = new Stack<>();
+		redoStack = new Stack<>();
+		
+		// Retrive grid dimensions
 		height = charGrid.length;
 		width = charGrid[0].length;
 		
-		//Initialize empty grid
+		// Initialize empty grid
 		grid = new Cell[height][width];
 		
-		//Fill grid with corresponding cell
+		// Fill grid with corresponding cell
 		for (int y = 0; y < height; y++)
 			for (int x = 0; x < width; x++) {
-				
 				
 				switch (charGrid[y][x]) {
 				case Cell.NONE:
 					grid[y][x] = new Cell();
 					break;
 				case Cell.EMPTY:
-					grid[y][x] = new Cell(x, y, false, false, false);
-					break;
-				case Cell.BLOCK_ENDPOINT:
-					grid[y][x] = new Cell(x, y, false, true, true);
-					break;
-				case Cell.BLOCK:
-					grid[y][x] = new Cell(x, y, false, true, false);
+					grid[y][x] = new Cell(x, y, false, false);
 					break;
 				case Cell.WALL:
-					grid[y][x] = new Cell(x, y, true, false, false);
+					grid[y][x] = new Cell(x, y, true, false);
 					break;
 				case Cell.ENDPOINT:
-					grid[y][x] = new Cell(x, y, false, false, true);
+					grid[y][x] = new Cell(x, y, false, true);
+					break;
+				case Cell.BLOCK:
+					grid[y][x] = new Cell(x, y, false, false);
+					blocks.add(new Block(x, y));
+					break;
+				case Cell.BLOCK_ENDPOINT:
+					grid[y][x] = new Cell(x, y, false, true);
+					blocks.add(new Block(x, y));
 					break;
 				case Cell.PLAYER:
-					grid[y][x] = new Cell(x, y, false, false, false);
-					playerX = x;
-					playerY = y;
+					grid[y][x] = new Cell(x, y, false, false);
+					player = new Player(x, y);
 					break;
 				case Cell.PLAYER_ENDPOINT:
-					grid[y][x] = new Cell(x, y, false, false, true);
-					playerX = x;
-					playerY = y;
+					grid[y][x] = new Cell(x, y, false, true);
+					player = new Player(x, y);
 					break;
 					
-				//If no specifications, set noneCell
+				// If no specifications, set noneCell
 				default:
 					grid[y][x] = new Cell();
 				}
@@ -80,138 +104,192 @@ public class Game {
 	}
 	
 	
-	//Validation
+	// Validation
+	/**
+	 * Checks if game is finished.
+	 * @return {@code true} if all endpoint cells are covered, else {@code false}.
+	 */
 	public boolean isFinished() {
-		//Iterate through grid and look for uncovered endpoint tiles
-		for (Cell[] cellArray : grid)
-			for (Cell cell : cellArray)
-				if (cell.isEndpoint()  &&  !cell.isBlock())
+		// Iterate through grid and look for uncovered endpoint tiles
+		for (Cell[] cellRow : grid)
+			for (Cell cell : cellRow)
+				if (cell.isEndpoint()  &&  !hasBlock(cell))
 					return false;
 		
 		return true;
 	}
 	
+	/**
+	 * Returns whether requested move is legal.
+	 */
 	private boolean isValidMove(Direction direction) {
-		//Check indices
-		int newX = playerX + direction.VALUE[0];
-		int newY = playerY + direction.VALUE[1];
+		// Check indices
+		int newX = player.getX() + direction.getX();
+		int newY = player.getY() + direction.getY();
 		if ((newX < 0)  ||  (newX >= width)) return false;
 		if ((newY < 0)  ||  (newY >= height)) return false;
 		
-		//Check adjacent cell
-		if (getAdjacent(direction).isEmpty())
+		// Check adjacent cell
+		if (isFree(getAdjacent(direction)))
 			return true;
 		
-		//If cell contains block, check if block can be pushed
-		if (getAdjacent(direction).isBlock())
-			if (getAdjacent2(direction).isEmpty())
+		// If cell contains block, check if block can be pushed
+		if (hasBlock(getAdjacent(direction)))
+			if (isFree(getAdjacent2(direction)))
 				return true;
 			
 		return false;
 	}
 	
 	
-	//Actions
-	//Move block from initial cell to adjacent cell
-	private void pushBlock(Direction direction) {
-		getAdjacent(direction).setBlock(false);
-		getAdjacent2(direction).setBlock(true);
-	}
-	
-	//Attempts to make a move in given direction
-	public boolean move(Direction direction) {
-		//Used to mess around when finished, have fun :)
+	// Actions
+	/**
+	 * Attempts to make a move in given direction.
+	 * @return {@code true} if requested move was legal, else {@code false}. 
+	 */
+	public int move(Direction direction) {
+		// Used to mess around when finished, have fun :)
 		if (isFinished()) {
-			movePlayer(direction, false);
-			return true;
+			player.move(direction, false);
+			return PLAYER_MOVE;
 		}
 
-		//Break if move is invalid
+		// Break if move is invalid
 		if (!isValidMove(direction)) 
-			return false;
+			return ILLEGAL_MOVE;
 		
-		//If adjacent cell is a block, push block and move player
-		if (getAdjacent(direction).isBlock()) {
-			pushBlock(direction);
-			movePlayer(direction, true);
-			return true;
+		// If adjacent cell is a block, push block and move player
+		if (hasBlock(getAdjacent(direction))) {
+			// Retrive block at given cell
+			Block block = getBlock(getAdjacent(direction));
+			
+			// Push selected block
+			block.push(direction);
+			
+			// Move player
+			player.move(direction, true);
+			
+			return PLAYER_BLOCK_MOVE;
 		}
 		
-		//If adjacent cell is empty, move player
-		else if (getAdjacent(direction).isEmpty()) {
-			movePlayer(direction, true);
-			return true;
+		// If adjacent cell is free, move player
+		else if (isFree(getAdjacent(direction))) {
+			player.move(direction, true);
+			return PLAYER_MOVE;
 		}
 		
-		return false;
-	}
-	
-	//Moves player coordinates
-	public void movePlayer(Direction direction, boolean incrementMoveCount) {
-		playerX += direction.VALUE[0];
-		playerY += direction.VALUE[1];
-		
-		if (incrementMoveCount) 
-			numOfMoves++;
+		return ILLEGAL_MOVE;
 	}
 	
 	
-	//Undo Actions
-	//Redo action if possible
+	// Cached moves
+	/**
+	 * Redo action if possible.
+	 */
 	public void redo() {
 		
 	}
 
-	//Undo action if possible
+	/**
+	 * Undo action if possible.
+	 */
 	public void undo() {
 		
 	}
 	
 	
-	//Getters
-	//Returns cell at (x, y)
+	// Getters
+	/**
+	 * Returns whether a block is located on given cell.
+	 */
+	public boolean hasBlock(Cell cell) {
+		// Check if any block satisfies given predicate
+		return blocks.stream().anyMatch(block -> Arrays.equals(block.getCoords(), cell.getCoords()));
+	}
+	
+	/**
+	 * Returns true if cell is empty and does not contain a block.
+	 */
+	public boolean isFree(Cell cell) {
+		return (cell.isEmpty() && !hasBlock(cell));
+	}
+		
+	/**
+	 * Returns cell at (x, y).
+	 */
 	public Cell get(int x, int y) {
 		return grid[y][x];
 	}
 	
-	//Returns cell at distance 1 in given direction relative to player coordinates
+	/**
+	 * Returns player.
+	 */
+	public Player getPlayer() {
+		return player;
+	}
+	
+	/**
+	 * Returns block at given cell if any.
+	 */
+	public Block getBlock(Cell cell) {
+		// Return block at given cell if any (filter uses lazy evaluation)
+		return blocks.stream().filter(block ->  Arrays.equals(block.getCoords(), cell.getCoords())).findFirst().get();
+	}
+	
+	/**
+	 * Returns block at distance 1 in given direction relative to player coordinates.
+	 */
+	public Block getBlock(Direction direction) {
+		// Cell at distance 1 relative to player
+		Cell adjacentCell = getAdjacent(direction);
+		
+		// Return block at given cell if any (filter uses lazy evaluation)
+		return blocks.stream().filter(block ->  Arrays.equals(block.getCoords(), adjacentCell.getCoords())).findFirst().get();
+	}
+	
+	
+	
+	/**
+	 * Returns a set containing all blocks in grid.
+	 */
+	public Set<Block> getBlocks() {
+		return blocks;
+	}
+	
+	/**
+	 * Returns cell at distance 1 in given direction relative to player coordinates.
+	 */
 	public Cell getAdjacent(Direction direction) {
-		return get(playerX + direction.VALUE[0], playerY + direction.VALUE[1]);
+		return get(player.getX() + direction.getX(), player.getY() + direction.getY());
 	}
 	
-	//Returns cell at distance 2 in given direction relative to player coordinates
+	/**
+	 * Returns cell at distance 2 in given direction relative to player coordinates.
+	 */
 	public Cell getAdjacent2(Direction direction) {
-		return get(playerX + 2*direction.VALUE[0], playerY + 2*direction.VALUE[1]);
+		return get(player.getX() + 2*direction.getX(), player.getY() + 2*direction.getY());
 	}
 	
-	//Returns player coordinates
-	public int[] getPlayerCoords() {
-		return new int[] {playerX, playerY};
-	}
-	
-	//Returns number of player moves
-	public int getNumOfMoves() {
-		return numOfMoves;
-	}
-	
-	//Getters for board size
-	public int getWidth() {
-		return width;
-	}
-	
-	public int getHeight() {
-		return height;
-	}
+
+	// Getters for board dimensions
+	public int getWidth() {return width;}
+	public int getHeight() {return height;}
 	
 	
-	//Other
-	//Prints grid as table
+	// Deprecated
+	/**
+	 * Prints grid as table.
+	 */
+	@Deprecated
 	public void printGrid() {
 		System.out.println(toString());
 	}
 	
-	//Returns string generated by asTable()
+	/**
+	 * Returns string generated by asTable().
+	 */
 	@Override
+	@Deprecated
 	public String toString() {
 		String outputStr = "";
 		for (Cell[] cellArray : grid) {
@@ -222,30 +300,39 @@ public class Game {
 		return outputStr.trim();
 	}
 	
-	//Main
+	
+	// Main
 	public static void main(String[] args) {
 		Game game1 = new Game(Levels.getLevel(1));
 		
 		game1.printGrid();
 	}
-
-	
-	
 }
 
+
+/**
+ * Constants used for player / block movement.
+ */
 enum Direction {
-	UP 		(new int[] {0, -1}),
-	DOWN 	(new int[] {0, 1}),
-	LEFT 	(new int[] {-1, 0}),
-	RIGHT 	(new int[] {1, 0});
+	UP 		(0, -1),
+	DOWN 	(0, 1),
+	LEFT 	(-1, 0),
+	RIGHT 	(1, 0);
 	
-	public final int[] VALUE;
+	// Fields
+	public final int X, Y;
 	
-	private Direction(int[] dirArr) {
-		this.VALUE = dirArr;
+	// Constructor
+	private Direction(int x, int y) {
+		this.X = x;
+		this.Y = y;
 	}
 	
-	// Return inversed direction
+	// Returns respective X and Y coordinates
+	public int getX() {return X;}
+	public int getY() {return Y;}
+	
+	// Returns the inverse Direction object
 	public Direction getInverse() {
 		switch (this) {
 		case UP:
