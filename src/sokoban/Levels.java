@@ -3,6 +3,7 @@ package sokoban;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -66,7 +67,11 @@ public class Levels {
 		int height = 0;
 		int width = 0;
 		
-		String[] levelArr = level.split("\n");
+		String[] levelArr = level.replaceAll("\\s++$", "").split("\n");
+		
+		System.out.println(levelArr[0]);
+		Arrays.stream(levelArr).map(str -> str.replaceAll("\\s++$", ""));
+		System.out.println(levelArr[0]);
 		
 		//Set board height
 		height = levelArr.length;
@@ -82,10 +87,11 @@ public class Levels {
 		//Iterate through strings to define output table
 		for (int row = 0; row < height; row++) {
 			int firstWallIndex = levelArr[row].indexOf("#");
+			int lastWallIndex = levelArr[row].lastIndexOf("#");
 			for (int col = 0; col < width; col++) {
 				if (col < levelArr[row].length()) {
 					char currentChar = levelArr[row].charAt(col);
-					if (currentChar == ' '  &&  col < firstWallIndex)
+					if (currentChar == ' '  &&  ((col < firstWallIndex)  || (col > lastWallIndex)))
 						output[row][col] = Cell.NONE;
 					else
 						output[row][col] = currentChar;

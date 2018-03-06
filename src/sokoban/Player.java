@@ -21,11 +21,11 @@ public class Player {
 	
 	//Actions
 	//Move player from initial cell to adjacent cell
-	public void move(Direction direction, boolean incremenetMoveCount) {
+	public void move(Direction direction, int moveCount) {
 		x += direction.getX();
 		y += direction.getY();
 		
-		if (incremenetMoveCount) 
-			moveCount++;
+		// Update move counter
+		this.moveCount += moveCount;
 	}
 }

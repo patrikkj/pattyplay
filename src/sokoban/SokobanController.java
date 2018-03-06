@@ -1,6 +1,12 @@
 package sokoban;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.PrintStream;
 import java.util.HashMap;
+import java.util.Scanner;
 
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
@@ -19,6 +25,9 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.util.Duration;
 
 public class SokobanController {
@@ -26,6 +35,7 @@ public class SokobanController {
 	private Game game;
 	private Scene scene;
 	private GridPane gridPane;
+	private boolean customLevel;
 	private double duration;
 	private double tileWidth;
 	private double tileHeight;
@@ -71,7 +81,8 @@ public class SokobanController {
 	//Initialize GUI
 	private void initializeGrid() {
 		//Load specified level
-		game = new Game(Levels.getLevel(level));
+		if (!customLevel)
+			game = new Game(Levels.getLevel(level));
 		
 		//Create Grid Pane to encapsulate tiles
 		gridPane = new GridPane();
@@ -144,6 +155,8 @@ public class SokobanController {
 		scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
+				//Local variables
+				Move move = null;
 				String key = event.getCode().getName();
 				System.out.println(key);
 				//Check directions
@@ -188,11 +201,36 @@ public class SokobanController {
 						moveBlock(game.getBlock(Direction.RIGHT));
 						break;}
 					break;
-				case "Plus":
-					game.redo();
+				case "X":
+					move = game.redo();
+					
+					// Break if stack is empty
+					if (move == null) break;
+					
+					// Move block if pushed
+					if (move.isPush())
+						moveBlock(game.getBlock(move.getDirection()));
+					
+					// Move player
+					moveCharacter(move.getDirection());
 					break;
-				case "Minus":
-					game.undo();
+				case "Z":
+					// Original move
+					move = game.undo();
+					
+					// Break if stack is empty
+					if (move == null) break;
+					
+					// Get direction of move to perform
+					Direction undoDirection = move.getDirection().getInverse();
+					
+					// Move block if pushed
+					if (move.isPush())
+						moveBlock(game.getBlock(move.getDirection()));
+					
+					// Move player
+					moveCharacter(undoDirection);
+
 					break;
 				case "R":
 					System.out.println("Reset");
@@ -277,12 +315,14 @@ public class SokobanController {
 	//Load previous level
 	@FXML private void previousLevel() {
 		level--;
+		customLevel = false;
 		resetLevel();
 	}
 	
 	//Load next level
 	@FXML private void nextLevel() {
 		level++;
+		customLevel = false;
 		resetLevel();
 	}
 	
@@ -434,7 +474,10 @@ public class SokobanController {
 	private void moveBlock(Block block) {
 		//Animation duration
 		duration = 300;
-			
+		
+//		if (game.get(block.getX(), block.getY()).isEndpoint())
+//			getImageView(block)
+		
 		//Transition properties
 		TranslateTransition translateTransition = new TranslateTransition();
 		translateTransition.setNode(blockMap.get(block));
@@ -458,11 +501,67 @@ public class SokobanController {
 	
 	//Handlers
 	@FXML
-    private void handleLoadClick(ActionEvent event) {
-    }
+    private void handleLoadClick(ActionEvent event) throws FileNotFoundException {
+		StringBuilder levelStringBuilder = new StringBuilder();
+		
+		// Retrive parent for file chooser
+    	Stage mainStage = (Stage) rootPane.getScene().getWindow();
+    	
+    	// Construct file chooser
+    	FileChooser fileChooser = new FileChooser();
+    	fileChooser.setTitle("Open Data File");
+    	fileChooser.getExtensionFilters().addAll(
+    	         new ExtensionFilter("Text file (*.txt)", "*.txt"),
+    	         new ExtensionFilter("All Files", "*.*"));
+    	
+    	// Launch file chooser and retrive selected file
+    	File selectedFile = fileChooser.showOpenDialog(mainStage);
+    	
+    	// File stream
+    	Scanner fileScanner = new Scanner(selectedFile);
+    	
+    	// Scan through file
+    	while (fileScanner.hasNextLine())
+    		levelStringBuilder.append(fileScanner.nextLine() + '\n');
+    	
+    	// Close scanner
+    	fileScanner.close();
+    	
+    	// Retrive level string
+    	String levelString = levelStringBuilder.toString();
+    	
+    	// Update current level
+    	game = new Game(Levels.parseStr(levelString));
+    	customLevel = true;
+    	
+    	// Load new level
+    	resetLevel();
+	}
 
     @FXML
-    private void handleSaveClick(ActionEvent event) {
+    private void handleSaveClick(ActionEvent event) throws FileNotFoundException {
+    	// Retrive parent for file chooser
+    	Stage mainStage = (Stage) rootPane.getScene().getWindow();
+    	
+    	// Construct file chooser
+    	FileChooser fileChooser = new FileChooser();
+    	fileChooser.setTitle("Open Data File");
+    	fileChooser.getExtensionFilters().addAll(
+    	         new ExtensionFilter("Text file (*.txt)", "*.txt"),
+    	         new ExtensionFilter("All Files", "*.*"));
+    	
+    	// Launch file chooser and retrive selected file
+    	File selectedFile = fileChooser.showSaveDialog(mainStage);
+    	
+    	// Create printstream
+    	PrintStream printStream = new PrintStream(new FileOutputStream(selectedFile));
+    	
+    	// Print game to file
+    	printStream.print(game);
+    	
+    	// Close stream
+    	printStream.flush();
+    	printStream.close();
     }
 
     

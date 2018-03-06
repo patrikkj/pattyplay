@@ -78,7 +78,6 @@ public class Cell {
 		if (isWall()) 						output = WALL;
 		else if (isEndpoint()) 				output = ENDPOINT;
 		else if (isNone()) 					output = NONE;
-		else if (isEmpty())					output = EMPTY;
 		
 		return output;
 		

@@ -31,6 +31,26 @@
                         <String fx:value="buttonHoverColor" />
                      </styleClass>
                   </JFXButton>
+                  <JFXButton focusTraversable="false" onAction="#handleSaveClick" ripplerFill="#979797" text="Save" textFill="#9e9e9e">
+                     <font>
+                        <Font name="Gabriola" size="23.0" />
+                     </font>
+                     <styleClass>
+                        <String fx:value="backgroundColor" />
+                        <String fx:value="textColor" />
+                        <String fx:value="buttonHoverColor" />
+                     </styleClass>
+                  </JFXButton>
+                  <JFXButton focusTraversable="false" onAction="#handleLoadClick" ripplerFill="#979797" text="Load" textFill="#9e9e9e">
+                     <font>
+                        <Font name="Gabriola" size="23.0" />
+                     </font>
+                     <styleClass>
+                        <String fx:value="backgroundColor" />
+                        <String fx:value="textColor" />
+                        <String fx:value="buttonHoverColor" />
+                     </styleClass>
+                  </JFXButton>
                   <Label fx:id="levelLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="textColor" stylesheets="@../resources/stylesheet.css" text="Level: 100" textAlignment="CENTER" HBox.hgrow="ALWAYS">
                      <font>
                         <Font name="Gabriola" size="23.0" />
@@ -39,7 +59,7 @@
                         <Insets right="10.0" />
                      </HBox.margin>
                      <padding>
-                        <Insets left="50.0" />
+                        <Insets left="20.0" />
                      </padding>
                      <effect>
                         <SepiaTone>
@@ -75,7 +95,7 @@
                         </SepiaTone>
                      </effect>
                      <HBox.margin>
-                        <Insets left="10.0" right="30.0" />
+                        <Insets left="10.0" />
                      </HBox.margin>
                   </Label>
                   <JFXButton focusTraversable="false" onAction="#previousLevel" ripplerFill="#979797" text="Previous" textFill="#9e9e9e">
