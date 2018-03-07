@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.PrintStream;
 import java.util.HashMap;
@@ -14,7 +13,6 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
-import javafx.beans.binding.MapBinding;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -29,8 +27,8 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class SokobanController {
@@ -45,7 +43,6 @@ public class SokobanController {
 	private double tileSize;
 	private int tilesX;
 	private int tilesY;
-	private int level;
 	
 	//Animation
 	private Image image1, image2;
@@ -65,10 +62,11 @@ public class SokobanController {
 	@FXML Label movesLabel;
 	
 	
+	
 	//Initialize Game
 	public void initialize() throws FileNotFoundException {
-		//Set default level
-		level = 1;
+		// Initialize game
+		game = new Game();
 		
 		//Fill imageMap
 		initializeImageMap();
@@ -86,16 +84,12 @@ public class SokobanController {
 		renderBlocks();
 		
 		//Set labels
-		levelLabel.setText(String.format("Level: %s", level));
-		movesLabel.setText(String.format("Moves: %s", game.getPlayer().getMoveCount()));
+		levelLabel.setText(String.format("Level: %s", game.getLevel()));
+		movesLabel.setText(String.format("Moves: %s", game.getMoveCount()));
 	}
 	
 	//Initialize GUI
 	private void initializeGrid() {
-		//Load specified level
-		if (!customLevel)
-			game = new Game(Levels.getLevel(level));
-		
 		//Create Grid Pane to encapsulate tiles
 		gridPane = new GridPane();
 		gridPane.setAlignment(Pos.CENTER);
@@ -170,6 +164,7 @@ public class SokobanController {
 				return filename.endsWith(".png");
 			}
 		};
+		
     	for (File imageFile : importFolder.listFiles(fileFilter))
     		imageMap.put(imageFile.getName(), new Image(new FileInputStream(imageFile)));
 	}
@@ -185,87 +180,55 @@ public class SokobanController {
 			public void handle(KeyEvent event) {
 				//Local variables
 				Move move = null;
+				boolean moonWalk = false;
+				
+				//Get key pressed
 				String key = event.getCode().getName();
-				//Check directions
+				
+				//Perform action based on pressed key
 				switch (key) {
 				case "Up":
-					switch (game.move(Direction.UP)) {
-					case Game.PLAYER_MOVE:
-						moveCharacter(Direction.UP, false);
-						break;
-					case Game.PLAYER_BLOCK_MOVE:
-						moveCharacter(Direction.UP, false);
-						moveBlock(game.getBlock(Direction.UP));
-						break;}
+					move = game.move(Direction.UP);
 					break;
 				case "Down":
-					switch (game.move(Direction.DOWN)) {
-					case Game.PLAYER_MOVE:
-						moveCharacter(Direction.DOWN, false);
-						break;
-					case Game.PLAYER_BLOCK_MOVE:
-						moveCharacter(Direction.DOWN, false);
-						moveBlock(game.getBlock(Direction.DOWN));
-						break;}
+					move = game.move(Direction.DOWN);
 					break;
 				case "Left":
-					switch (game.move(Direction.LEFT)) {
-					case Game.PLAYER_MOVE:
-						moveCharacter(Direction.LEFT, false);
-						break;
-					case Game.PLAYER_BLOCK_MOVE:
-						moveCharacter(Direction.LEFT, false);
-						moveBlock(game.getBlock(Direction.LEFT));
-						break;}
+					move = game.move(Direction.LEFT);
 					break;
 				case "Right":
-					switch (game.move(Direction.RIGHT)) {
-					case Game.PLAYER_MOVE:
-						moveCharacter(Direction.RIGHT, false);
-						break;
-					case Game.PLAYER_BLOCK_MOVE:
-						moveCharacter(Direction.RIGHT, false);
-						moveBlock(game.getBlock(Direction.RIGHT));
-						break;}
+					move = game.move(Direction.RIGHT);
 					break;
 				case "X":
 					move = game.redo();
-					
-					// Break if stack is empty
-					if (move == null) break;
-					
-					// Move player
-					moveCharacter(move.getDirection(), false);
-
-					// Move block if pushed
-					if (move.isPush())
-						moveBlock(game.getBlock(move.getDirection()));
 					break;
 				case "Z":
-					// Original move
 					move = game.undo();
-					
-					// Break if stack is empty
-					if (move == null) break;
-					
-					// Get direction of move to perform
-					Direction undoDirection = move.getDirection().getInverse();
-					
-					// Move player
-					moveCharacter(undoDirection, true);
-
-					// Move block if pushed
-					if (move.isPush())
-						moveBlock(game.getBlock(move.getDirection()));
+					moonWalk = true;
 					break;
 				case "R":
-					System.out.println("Reset");
 					resetLevel();
+					return;
+				default:
+					System.out.println("Key not supported: " + key);
+					return;
 				}
 				
-				//Update GUI after move
+				// Break if move is invalid
+				if (move == Move.ILLEGAL) return;
+				
+				// Move character
+				moveCharacter(move.getDirection(), moonWalk);
+				
+				// Move block
+				if (move.isPush())
+					moveBlock(move.getDirection());
+					
+				//Update GUI
 				update();			
-				System.out.printf("undoStack: %s\nredoStack: %s\n", game.undoStack, game.redoStack);
+				System.out.printf("undoStack: %s\n"
+								+ "redoStack: %s\n", 
+								game.undoStack, game.redoStack);
 		}});
 	}
 	
@@ -274,8 +237,8 @@ public class SokobanController {
 	//Update GUI
 	private void update() {
 		//Update labels
-		levelLabel.setText(String.format("Level: %s", level));
-		movesLabel.setText(String.format("Moves: %s", game.getPlayer().getMoveCount()));
+		levelLabel.setText(String.format("Level: %s", game.getLevel()));
+		movesLabel.setText(String.format("Moves: %s", game.getMoveCount()));
 		
 		int[] playerCoords = game.getPlayer().getCoords();
 		
@@ -345,21 +308,31 @@ public class SokobanController {
 	
 	//Load previous level
 	@FXML private void previousLevel() {
-		level--;
-		customLevel = false;
+		//Lower level bound
+		if (game.getLevel() <= 1) return;
+		
+		//Load new level
+		game.load(game.getLevel() - 1);
+		
+		//Update
 		resetLevel();
 	}
 	
 	//Load next level
 	@FXML private void nextLevel() {
-		level++;
-		customLevel = false;
+		//Upper level bound
+		if (game.getLevel() >= Levels.getNumOfLevels()) return;
+		
+		//Load new level
+		game.load(game.getLevel() + 1);
+		
+		//Update
 		resetLevel();
 	}
 	
 	//Reset current level
 	@FXML private void resetLevel() {
-		initializeGrid();		
+		initializeGrid();
 		renderCharacter();
 		renderBlocks();
 		update();
@@ -390,15 +363,15 @@ public class SokobanController {
 	
 	//Character movement
 	private void moveCharacter(Direction direction, boolean moonWalk) {
+		// Set animation properties
+		duration = 300;
+		animationCycles = 2;
+
 		// Change properties to perform moonwalk if requested
-		if (moonWalk) {
-			direction = direction.getInverse();
-			duration = 300;		
-			animationCycles = 2;
-		} else {
-			duration = 300;
-			animationCycles = 2;
-		}
+//		if (moonWalk) {
+//			duration = 300;		
+//			animationCycles = 2;
+//		}
 		
 		switch (direction) {
 		case UP:
@@ -460,9 +433,6 @@ public class SokobanController {
 		}
 		
 		timeline.play();
-		
-//		System.out.println(String.format("Player coords: [%s, %s] Pixel coords: [%s, %s]", 
-//				game.getPlayer().getX(), game.getPlayer().getY(), charPane.getTranslateX(), charPane.getTranslateY()));
 	}
 
 	//Block rendering
@@ -502,11 +472,15 @@ public class SokobanController {
 	}
 	
 	//Block movememnt
-	private void moveBlock(Block block) {
+	private void moveBlock(Direction direction) {
 		//Local vars
 		TranslateTransition translateTransition;
 		Timeline timeline;
 		ImageView blockImageView;
+		Block block;
+		
+		//Get block
+		block = game.getBlock(direction);
 		
 		//Transition properties
 		translateTransition = new TranslateTransition();
@@ -551,8 +525,6 @@ public class SokobanController {
 	//Handlers
 	@FXML
     private void handleLoadClick(ActionEvent event) throws FileNotFoundException {
-		StringBuilder levelStringBuilder = new StringBuilder();
-		
 		// Retrive parent for file chooser
     	Stage mainStage = (Stage) rootPane.getScene().getWindow();
     	
@@ -565,33 +537,17 @@ public class SokobanController {
     	
     	// Launch file chooser and retrive selected file
     	File selectedFile = fileChooser.showOpenDialog(mainStage);
+
+    	// Break if no file has been selected
+    	if (selectedFile == null) return;
     	
-    	// File scanner
-    	Scanner fileScanner = new Scanner(selectedFile);
-    	
-    	// Scan through file
-    	while (fileScanner.hasNextLine())
-    		levelStringBuilder.append(fileScanner.nextLine() + '\n');
-    	
-    	// Close scanner
-    	fileScanner.close();
-    	
-    	// Retrive level string
-    	String rawString = levelStringBuilder.toString();
-    	
-    	// Separate level data 
-    	String[] rawArray = rawString.split(";");
-    	String levelString = rawArray[0];
-    	String levelCount = rawArray[1].substring(rawArray[1].indexOf(':') + 1).trim();
-    	String moveCount = rawArray[2].substring(rawArray[2].indexOf(':') + 1).trim();
-    	
-    	// Update current level
-    	game = new Game(Levels.parseStr(levelString));
-    	level = Integer.valueOf(levelCount);
-    	game.getPlayer().setMoveCount(Integer.valueOf(moveCount));
+    	// Mark current level as custom
     	customLevel = true;
     	
     	// Load new level
+    	game.load(selectedFile);
+    	
+    	// Update
     	resetLevel();
 	}
 
@@ -610,15 +566,11 @@ public class SokobanController {
     	// Launch file chooser and retrive selected file
     	File selectedFile = fileChooser.showSaveDialog(mainStage);
     	
-    	// Create printstream
-    	PrintStream printStream = new PrintStream(new FileOutputStream(selectedFile));
+    	// Break if no file has been selected
+    	if (selectedFile == null) return;
     	
-    	// Print game to file
-    	printStream.print(game + String.format("\n;Level:%s;Moves:%s", level, game.getPlayer().getMoveCount()));
-    	
-    	// Close stream
-    	printStream.flush();
-    	printStream.close();
+    	// Save current game
+    	game.save(selectedFile);
     }
 
     

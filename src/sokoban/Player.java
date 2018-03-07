@@ -3,7 +3,6 @@ package sokoban;
 public class Player {
 	//Coordinates
 	private int x, y;			//X and Y coordinates relative to grid
-	private int moveCount;		//Number of moves
 	
 	
 	//Constructor
@@ -17,18 +16,12 @@ public class Player {
 	public int getX() {return x;}
 	public int getY() {return y;}
 	public int[] getCoords() {return new int[] {x, y};}
-	public int getMoveCount() {return moveCount;}
-	
-	//Setter (Used when loading levels)
-	public void setMoveCount(int moveCount) {this.moveCount = moveCount;}
+
 	
 	//Actions
 	//Move player from initial cell to adjacent cell
-	public void move(Direction direction, int moveCount) {
+	public void move(Direction direction) {
 		x += direction.getX();
 		y += direction.getY();
-		
-		// Update move counter
-		this.moveCount += moveCount;
 	}
 }

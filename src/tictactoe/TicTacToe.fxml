@@ -31,7 +31,7 @@
                         <String fx:value="buttonHoverColor" />
                      </styleClass>
                   </JFXButton>
-                  <JFXButton focusTraversable="false" layoutX="10.0" layoutY="10.0" onAction="#handleSaveClick" ripplerFill="#979797" text="Save" textFill="#9e9e9e">
+                  <JFXButton disable="true" focusTraversable="false" layoutX="10.0" layoutY="10.0" onAction="#handleSaveClick" ripplerFill="#979797" text="Save" textFill="#9e9e9e">
                      <font>
                         <Font name="Gabriola" size="23.0" />
                      </font>
@@ -41,7 +41,7 @@
                         <String fx:value="buttonHoverColor" />
                      </styleClass>
                   </JFXButton>
-                  <JFXButton focusTraversable="false" layoutX="10.0" layoutY="10.0" onAction="#handleLoadClick" ripplerFill="#979797" text="Load" textFill="#9e9e9e">
+                  <JFXButton disable="true" focusTraversable="false" layoutX="10.0" layoutY="10.0" onAction="#handleLoadClick" ripplerFill="#979797" text="Load" textFill="#9e9e9e">
                      <font>
                         <Font name="Gabriola" size="23.0" />
                      </font>

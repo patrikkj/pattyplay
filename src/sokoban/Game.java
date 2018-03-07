@@ -1,50 +1,44 @@
 package sokoban;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
 
-public class Game {
+import app.Saveable;
+
+public class Game implements Saveable {
 	// Instance vars
 	private Cell[][] grid;			// Game board
 	private int height, width;		// Grid dimensions
-	
+	private int level;				// Current level
+	private int moveCount;			// Number of moves
+
 	// Dynamic entries
 	private Player player;			// Game character
 	private Set<Block> blocks;		// List of blocks
 	
 	// Move History
 	public Stack<Move> undoStack;
-	public Stack<Move> redoStack;
-	private boolean isRedo;
-	private Move previousRedo; 		// Used to clear redoStack
-	
-	// Constants
-	public static final int ILLEGAL_MOVE = 0, PLAYER_MOVE = 1, PLAYER_BLOCK_MOVE = 2;
+	public Stack<Move> redoStack;	
 	
 	
-	// Constructors
+	// Constructor
 	/**
-	 * Constructs empty grid with specified dimensions.
+	 * Default constructor, loads level 1.
+	 * @see sokoban.Levels
 	 */
-	public Game(int width, int height) {
-		// Initialize Collections
-		blocks = new HashSet<>();
-		undoStack = new Stack<>();
-		redoStack = new Stack<>();
+	public Game() {
+		char[][] charGrid = Levels.loadLevel(1);
 		
-		// Retrive grid dimensions
-		this.width = width;
-		this.height = height;
+		//Set level data
+		level = 1;
+		moveCount = 0;
 		
-		// Initialize empty grid
-		grid = new Cell[height][width];
-		
-		// Fill grid with default cell
-		for (int y = 0; y < height; y++)
-			for (int x = 0; x < width; x++)
-				grid[y][x] = new Cell();
+		initializeCollections();
+		initializeGrid(charGrid);
 	}
 	
 	/**
@@ -53,11 +47,24 @@ public class Game {
 	 * @see sokoban.Levels
 	 */
 	public Game(char[][] charGrid) {
+		initializeCollections();
+		initializeGrid(charGrid);
+	}
+	
+	/**
+	 * Initializes collections used to keep track of game state.
+	 */
+	private void initializeCollections() {
 		// Initialize Collections
 		blocks = new HashSet<>();
 		undoStack = new Stack<>();
 		redoStack = new Stack<>();
-		
+	}
+	
+	/**
+	 * Initializes cell grid based on input character table.
+	 */
+	private void initializeGrid(char[][] charGrid) {
 		// Retrive grid dimensions
 		height = charGrid.length;
 		width = charGrid[0].length;
@@ -105,7 +112,7 @@ public class Game {
 				}
 			}
 	}
-	
+
 	
 	// Validation
 	/**
@@ -148,79 +155,63 @@ public class Game {
 	// Actions
 	/**
 	 * Attempts to make a move in given direction.
-	 * @return {@code true} if requested move was legal, else {@code false}. 
+	 * @return {@code Move} enumeration representing the move performed. 
 	 */
-	public int move(Direction direction) {
+	public Move move(Direction direction) {
 		// Used to mess around when finished, have fun :)
 		if (isFinished()) {
-			player.move(direction, 0);
-			return PLAYER_MOVE;
+			// Move player
+			player.move(direction);
+			
+			return direction.toMove(false);
 		}
 		
 		// Break if move is invalid
 		if (!isValidMove(direction)) 
-			return ILLEGAL_MOVE;
+			return Move.ILLEGAL;
 		
-		// Clear redo stack if required
-		if (!redoStack.isEmpty()  &&  (direction != previousRedo.getDirection())  && !isRedo)
-			redoStack.clear();
-		else if (!redoStack.isEmpty() && !isRedo)
+		// Pop if move performed is equal to the top move in redo stack
+		if (!redoStack.isEmpty()  &&  (direction == redoStack.peek().getDirection()))
 			redoStack.pop();
+		else  // If move pattern breaks with redo stack move pattern, clear history
+			redoStack.clear();
 		
-		// If adjacent cell is a block, push block and move player
-		if (hasBlock(getAdjacent(direction))) {
+		// Target cell
+		Cell targetCell = getAdjacent(direction);
+		
+		// Case: Targeted cell contains a block
+		if (hasBlock(targetCell)) {
 			// Retrive block at given cell
-			Block block = getBlock(getAdjacent(direction));
+			Block block = getBlock(targetCell);
 			
-			// Push selected block
+			// Move block
 			block.push(direction);
 			
-			// Move player
-			player.move(direction, 1);
+			// Move player and increment move count
+			player.move(direction);
+			moveCount++;
 			
 			// Push move onto undo stack
 			undoStack.push(direction.toMove(true));
 			
-			return PLAYER_BLOCK_MOVE;
+			// Return executed move
+			return direction.toMove(true);
 		}
 		
-		// If adjacent cell is free, move player
-		else if (isFree(getAdjacent(direction))) {
-			// Move player
-			player.move(direction, 1);
+		// Case: Targeted cell is free
+		else if (isFree(targetCell)) {
+			// Move player and increment move count
+			player.move(direction);
+			moveCount++;
 			
 			// Push move onto undo stack
 			undoStack.push(direction.toMove(false));
 			
-			return PLAYER_MOVE;
+			// Return executed move
+			return direction.toMove(false);
 		}
 		
-		return ILLEGAL_MOVE;
-	}
-	
-	
-	// Cached moves
-	/**
-	 * Redo action if possible.
-	 */
-	public Move redo() {
-		// Breaks if stack is empty
-		if (redoStack.isEmpty()) return null;
-		
-		// Move to be executed
-		Move move = redoStack.pop();
-		
-		// Set current move to redo move
-		isRedo = true;
-		
-		// Perform move
-		move(move.getDirection());
-		
-		// Unset current move
-		isRedo = false;
-		
-		// Return move
-		return move;
+		return Move.ILLEGAL;
 	}
 
 	/**
@@ -228,57 +219,59 @@ public class Game {
 	 */
 	public Move undo() {
 		// Breaks if stack is empty
-		if (undoStack.isEmpty()) return null;
+		if (undoStack.isEmpty()) return Move.ILLEGAL;
 		
 		// Move to be executed in reverse
 		Move move = undoStack.pop();
 		
-		// Get direction of move to perform
-		Direction undoDirection = move.getDirection().getInverse();
+		// Get direction of movement
+		Direction direction = move.getDirection().getInverse();
 		
-		// Undo push
+		// Move block 
 		if (move.isPush()) 
-			getBlock(move.getDirection()).push(undoDirection);
+			getBlock(move.getDirection()).push(direction);
 		
 		// Move player and decrement move count
-		player.move(undoDirection, -1);
+		player.move(direction);
+		moveCount--;
 		
-		// Add original move to redo stack
+		// Add move to redo stack
 		redoStack.push(move);
-		
-		// Update last redo operation
-		previousRedo = move;
 		
 		// Return original move
 		return move;
 	}
 	
+	/**
+	 * Redo action if possible.
+	 */
+	public Move redo() {
+		// Breaks if stack is empty
+		if (redoStack.isEmpty()) return Move.ILLEGAL;
+		
+		// Move to be executed
+		Move move = redoStack.pop();
+		
+		// Get direction of movement
+		Direction direction = move.getDirection();
+		
+		// Move block
+		if (move.isPush())
+			getBlock(direction).push(direction);
+			
+		// Move player and increment move count
+		player.move(direction);
+		moveCount++;
+		
+		// Add move to undo stack
+		undoStack.push(move);
+
+		// Return move
+		return move;
+	}
+	
 	
 	// Getters
-	/**
-	 * Returns whether a block is located on given cell.
-	 */
-	public boolean hasBlock(Cell cell) {
-		// Check if any block satisfies given predicate
-		return blocks.stream().anyMatch(block -> Arrays.equals(block.getCoords(), cell.getCoords()));
-	}
-	
-	/**
-	 * Returns whether a player is located on given cell.
-	 */
-	public boolean hasPlayer(Cell cell) {
-		// Check if any block satisfies given predicate
-		return blocks.stream().anyMatch(block -> Arrays.equals(player.getCoords(), cell.getCoords()));
-	}
-	
-	
-	/**
-	 * Returns true if cell is empty and does not contain a block.
-	 */
-	public boolean isFree(Cell cell) {
-		return (cell.isEmpty() && !hasBlock(cell));
-	}
-	
 	/**
 	 * Returns cell at (x, y).
 	 */
@@ -312,8 +305,6 @@ public class Game {
 		return blocks.stream().filter(block ->  Arrays.equals(block.getCoords(), adjacentCell.getCoords())).findFirst().get();
 	}
 	
-	
-	
 	/**
 	 * Returns a set containing all blocks in grid.
 	 */
@@ -335,21 +326,38 @@ public class Game {
 		return get(player.getX() + 2*direction.getX(), player.getY() + 2*direction.getY());
 	}
 	
-
-	// Getters for board dimensions
-	public int getWidth() {return width;}
-	public int getHeight() {return height;}
-	
-	
-	// Deprecated
+	// Boolean getters
 	/**
-	 * Prints grid as table.
+	 * Returns true if cell is empty and does not contain a block.
 	 */
-	@Deprecated
-	public void printGrid() {
-		System.out.println(toString());
+	public boolean isFree(Cell cell) {
+		return (cell.isEmpty() && !hasBlock(cell));
 	}
 	
+	/**
+	 * Returns whether a block is located on given cell.
+	 */
+	public boolean hasBlock(Cell cell) {
+		// Check if any block satisfies given predicate
+		return blocks.stream().anyMatch(block -> Arrays.equals(block.getCoords(), cell.getCoords()));
+	}
+	
+	/**
+	 * Returns whether a player is located on given cell.
+	 */
+	public boolean hasPlayer(Cell cell) {
+		// Check if any block satisfies given predicate
+		return blocks.stream().anyMatch(block -> Arrays.equals(player.getCoords(), cell.getCoords()));
+	}
+	
+	// Getters for game details
+	public int getWidth() {return width;}
+	public int getHeight() {return height;}
+	public int getLevel() {return level;}
+	public int getMoveCount() {return moveCount;}
+	
+	
+	// Other
 	/**
 	 * Returns string generated by asTable().
 	 */
@@ -364,6 +372,9 @@ public class Game {
 		return outputStr;
 	}
 	
+	/**
+	 * Converts cell to character using standard Sokoban formatting.
+	 */
 	private char toChar(Cell cell) {
 		if (hasPlayer(cell) && cell.isEndpoint()) 
 			return Cell.PLAYER_ENDPOINT;
@@ -384,24 +395,63 @@ public class Game {
 		
 		return '\0';
 	}
+
 	
-	// Main
-	public static void main(String[] args) {
-		Game game1 = new Game(Levels.getLevel(1));
+	// Save - Load
+	/**
+	 * Loads level given by {@code level} from predefined list.
+	 */
+	public void load(int level) {
+		// Parse level to grid of characters, this also updates Levels' static fields
+		char[][] charGrid = Levels.loadLevel(level);
 		
-		game1.printGrid();
+		// Set game details
+		this.level = Levels.getLevel();
+		moveCount = Levels.getInitMoveCount();
+		
+		// Rerun initializers
+		initializeCollections();
+		initializeGrid(charGrid);
+	}
+
+	/**
+	 * Loads level represented by {@code file}. Support standard Sokoban level format.
+	 */
+	public void load(File file) throws FileNotFoundException {
+		// Parse level to grid of characters, this also updates Levels' static fields
+		char[][] charGrid = Levels.loadLevel(file);
+		
+		// Set game details
+		level = Levels.getLevel();
+		moveCount = Levels.getInitMoveCount();
+		
+		// Rerun initializers
+		initializeCollections();
+		initializeGrid(charGrid);
+	}
+
+	/**
+	 * Saves current level to given file using Sokobans' standard level format.
+	 */
+	public void save(File file) throws FileNotFoundException {
+		Levels.saveLevel(file, this);
 	}
 }
 
 
+
+
+///////////// DIRECTION ////////////////
+
 /**
- * Constants used for player / block movement.
+ * Constants for describing directions.
  */
 enum Direction {
 	UP 		(0, -1),
 	DOWN 	(0, 1),
 	LEFT 	(-1, 0),
 	RIGHT 	(1, 0);
+	
 	
 	// Fields
 	private final int x, y;
@@ -433,7 +483,7 @@ enum Direction {
 		return null;
 	}
 	
-	// Returns corresponding Move enumeration
+	// Convert direction to Move enumeration
 	public Move toMove(boolean push) {
 		switch(this) {
 		case UP:
@@ -450,15 +500,30 @@ enum Direction {
 	}
 }
 
+
+
+
+///////////// MOVE ////////////////
+
+/**
+ * Constants used for player / block movement.
+ */
 enum Move {
+	//Player 
 	UP			(Direction.UP, false),
 	DOWN		(Direction.DOWN, false),
 	LEFT		(Direction.LEFT, false),
 	RIGHT		(Direction.RIGHT, false),
+	
+	// Player and block
 	UP_PUSH 	(Direction.UP, true),
 	DOWN_PUSH 	(Direction.DOWN, true),
 	LEFT_PUSH 	(Direction.LEFT, true),
-	RIGHT_PUSH 	(Direction.RIGHT, true);
+	RIGHT_PUSH 	(Direction.RIGHT, true),
+	
+	// Illegal 
+	ILLEGAL		(null, false);
+	
 	
 	// Fields
 	private final Direction direction;

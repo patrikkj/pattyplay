@@ -74,6 +74,9 @@
                            </input>
                         </SepiaTone>
                      </effect>
+                     <padding>
+                        <Insets left="15.0" />
+                     </padding>
                   </Label>
                   <Label fx:id="movesLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="82.0" styleClass="textColor" stylesheets="@../resources/stylesheet.css" text="Moves: 100" textAlignment="CENTER">
                      <font>
