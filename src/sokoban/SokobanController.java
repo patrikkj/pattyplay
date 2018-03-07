@@ -37,6 +37,7 @@ public class SokobanController {
 	private GridPane gridPane;
 	private StackPane charPane;
 	private ImageView charImageView;
+	private String blockColor;
 	private boolean customLevel;
 	private double tileWidth;
 	private double tileHeight;
@@ -50,6 +51,11 @@ public class SokobanController {
 	private int animationCycles;
 	
 	//Image map (Maps from file name to corresponding Image)
+	private static final String BEIGE = "Beige", 	BLUE = "Blue", 
+								BLACK = "Black", 	BROWN = "Brown", 
+								GRAY = "Gray", 		PURPLE = "Purple", 
+								RED = "Red", 		YELLOW = "Yellow";
+	
 	private HashMap<String, Image> imageMap;
 	
 	//Block container
@@ -67,6 +73,9 @@ public class SokobanController {
 	public void initialize() throws FileNotFoundException {
 		// Initialize game
 		game = new Game();
+		
+		// Set block color
+		blockColor = BLUE;
 		
 		//Fill imageMap
 		initializeImageMap();
@@ -280,13 +289,8 @@ public class SokobanController {
 			imageView.setFitHeight(tileSize);
 			imageView.setFitWidth(tileSize);
 			break;
-		case Cell.BLOCK_ENDPOINT:
-			imageView.setImage(imageMap.get("CrateDark_Blue.png"));
-			imageView.setFitHeight(tileSize);
-			imageView.setFitWidth(tileSize);
-			break;
 		case Cell.ENDPOINT:	
-			imageView.setImage(imageMap.get("EndPoint_Blue.png"));
+			imageView.setImage(imageMap.get(String.format("EndPoint_%s.png", blockColor)));
 			imageView.setFitHeight(tileSize/3);
 			imageView.setFitWidth(tileSize/3);
 			break;
@@ -452,9 +456,9 @@ public class SokobanController {
 			
 			// Initialize ImageView based on block state
 			if (game.get(block.getX(), block.getY()).isEndpoint())
-				blockImageView = new ImageView(imageMap.get("CrateDark_Blue.png"));
+				blockImageView = new ImageView(imageMap.get(String.format("CrateDark_%s.png", blockColor)));
 			else
-				blockImageView = new ImageView(imageMap.get("Crate_Blue.png"));
+				blockImageView = new ImageView(imageMap.get(String.format("Crate_%s.png", blockColor)));
 			
 			// Set ImageView properties
 			blockImageView.setFitHeight(tileSize);
@@ -500,10 +504,10 @@ public class SokobanController {
 		//Add actionEvents
 		if (game.get(block.getX(), block.getY()).isEndpoint())
 			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration),
-					ae -> blockImageView.setImage(imageMap.get("CrateDark_Blue.png"))));
+					ae -> blockImageView.setImage(imageMap.get(String.format("CrateDark_%s.png", blockColor)))));
 		else
 			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration),
-					ae -> blockImageView.setImage(imageMap.get("Crate_Blue.png"))));
+					ae -> blockImageView.setImage(imageMap.get(String.format("Crate_%s.png", blockColor)))));
 		
 		//Play timeline
 		timeline.play();
