@@ -19,6 +19,9 @@ public class Player {
 	public int[] getCoords() {return new int[] {x, y};}
 	public int getMoveCount() {return moveCount;}
 	
+	//Setter (Used when loading levels)
+	public void setMoveCount(int moveCount) {this.moveCount = moveCount;}
+	
 	//Actions
 	//Move player from initial cell to adjacent cell
 	public void move(Direction direction, int moveCount) {

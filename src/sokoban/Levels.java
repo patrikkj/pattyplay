@@ -69,9 +69,7 @@ public class Levels {
 		
 		String[] levelArr = level.replaceAll("\\s++$", "").split("\n");
 		
-		System.out.println(levelArr[0]);
 		Arrays.stream(levelArr).map(str -> str.replaceAll("\\s++$", ""));
-		System.out.println(levelArr[0]);
 		
 		//Set board height
 		height = levelArr.length;

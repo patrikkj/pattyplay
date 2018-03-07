@@ -15,8 +15,10 @@ public class Game {
 	private Set<Block> blocks;		// List of blocks
 	
 	// Move History
-	private Stack<Move> undoStack; 
-	private Stack<Move> redoStack;
+	public Stack<Move> undoStack;
+	public Stack<Move> redoStack;
+	private boolean isRedo;
+	private Move previousRedo; 		// Used to clear redoStack
 	
 	// Constants
 	public static final int ILLEGAL_MOVE = 0, PLAYER_MOVE = 1, PLAYER_BLOCK_MOVE = 2;
@@ -149,16 +151,21 @@ public class Game {
 	 * @return {@code true} if requested move was legal, else {@code false}. 
 	 */
 	public int move(Direction direction) {
-		System.out.println(toString());
 		// Used to mess around when finished, have fun :)
 		if (isFinished()) {
 			player.move(direction, 0);
 			return PLAYER_MOVE;
 		}
-
+		
 		// Break if move is invalid
 		if (!isValidMove(direction)) 
 			return ILLEGAL_MOVE;
+		
+		// Clear redo stack if required
+		if (!redoStack.isEmpty()  &&  (direction != previousRedo.getDirection())  && !isRedo)
+			redoStack.clear();
+		else if (!redoStack.isEmpty() && !isRedo)
+			redoStack.pop();
 		
 		// If adjacent cell is a block, push block and move player
 		if (hasBlock(getAdjacent(direction))) {
@@ -203,8 +210,14 @@ public class Game {
 		// Move to be executed
 		Move move = redoStack.pop();
 		
+		// Set current move to redo move
+		isRedo = true;
+		
 		// Perform move
 		move(move.getDirection());
+		
+		// Unset current move
+		isRedo = false;
 		
 		// Return move
 		return move;
@@ -232,6 +245,9 @@ public class Game {
 		
 		// Add original move to redo stack
 		redoStack.push(move);
+		
+		// Update last redo operation
+		previousRedo = move;
 		
 		// Return original move
 		return move;
@@ -262,7 +278,7 @@ public class Game {
 	public boolean isFree(Cell cell) {
 		return (cell.isEmpty() && !hasBlock(cell));
 	}
-		
+	
 	/**
 	 * Returns cell at (x, y).
 	 */

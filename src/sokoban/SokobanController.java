@@ -1,9 +1,11 @@
 package sokoban;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FilenameFilter;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -12,6 +14,7 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
+import javafx.beans.binding.MapBinding;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -31,20 +34,26 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.util.Duration;
 
 public class SokobanController {
-	//Instance variables
 	private Game game;
 	private Scene scene;
 	private GridPane gridPane;
+	private StackPane charPane;
+	private ImageView charImageView;
 	private boolean customLevel;
-	private double duration;
 	private double tileWidth;
 	private double tileHeight;
 	private double tileSize;
 	private int tilesX;
 	private int tilesY;
 	private int level;
-	private StackPane charPane;
-	private ImageView charImageView;
+	
+	//Animation
+	private Image image1, image2;
+	private double duration;
+	private int animationCycles;
+	
+	//Image map (Maps from file name to corresponding Image)
+	private HashMap<String, Image> imageMap;
 	
 	//Block container
 	private HashMap<Block, StackPane> blockMap;
@@ -57,9 +66,12 @@ public class SokobanController {
 	
 	
 	//Initialize Game
-	public void initialize() {
+	public void initialize() throws FileNotFoundException {
 		//Set default level
 		level = 1;
+		
+		//Fill imageMap
+		initializeImageMap();
 		
 		//Initialize GUI
 		initializeGrid();
@@ -146,6 +158,22 @@ public class SokobanController {
 		AnchorPane.setRightAnchor(gridPane, 0d);
 	}
 	
+	//Fills imageMap with images from 'icons.sokoban'
+	private void initializeImageMap() throws FileNotFoundException {
+		//Initialize
+		imageMap = new HashMap<>();
+		
+    	File importFolder = new File(getClass().getResource("../icons/sokoban").getPath());
+    	FilenameFilter fileFilter = new FilenameFilter() {
+			@Override
+			public boolean accept(File dir, String filename) {
+				return filename.endsWith(".png");
+			}
+		};
+    	for (File imageFile : importFolder.listFiles(fileFilter))
+    		imageMap.put(imageFile.getName(), new Image(new FileInputStream(imageFile)));
+	}
+	
 	//Set key listener (Note: Do not call prior to scene loading)
 	public void postInitialize() {
 		//Create reference to current scene
@@ -158,46 +186,45 @@ public class SokobanController {
 				//Local variables
 				Move move = null;
 				String key = event.getCode().getName();
-				System.out.println(key);
 				//Check directions
 				switch (key) {
 				case "Up":
 					switch (game.move(Direction.UP)) {
 					case Game.PLAYER_MOVE:
-						moveCharacter(Direction.UP);
+						moveCharacter(Direction.UP, false);
 						break;
 					case Game.PLAYER_BLOCK_MOVE:
-						moveCharacter(Direction.UP);
+						moveCharacter(Direction.UP, false);
 						moveBlock(game.getBlock(Direction.UP));
 						break;}
 					break;
 				case "Down":
 					switch (game.move(Direction.DOWN)) {
 					case Game.PLAYER_MOVE:
-						moveCharacter(Direction.DOWN);
+						moveCharacter(Direction.DOWN, false);
 						break;
 					case Game.PLAYER_BLOCK_MOVE:
-						moveCharacter(Direction.DOWN);
+						moveCharacter(Direction.DOWN, false);
 						moveBlock(game.getBlock(Direction.DOWN));
 						break;}
 					break;
 				case "Left":
 					switch (game.move(Direction.LEFT)) {
 					case Game.PLAYER_MOVE:
-						moveCharacter(Direction.LEFT);
+						moveCharacter(Direction.LEFT, false);
 						break;
 					case Game.PLAYER_BLOCK_MOVE:
-						moveCharacter(Direction.LEFT);
+						moveCharacter(Direction.LEFT, false);
 						moveBlock(game.getBlock(Direction.LEFT));
 						break;}
 					break;
 				case "Right":
 					switch (game.move(Direction.RIGHT)) {
 					case Game.PLAYER_MOVE:
-						moveCharacter(Direction.RIGHT);
+						moveCharacter(Direction.RIGHT, false);
 						break;
 					case Game.PLAYER_BLOCK_MOVE:
-						moveCharacter(Direction.RIGHT);
+						moveCharacter(Direction.RIGHT, false);
 						moveBlock(game.getBlock(Direction.RIGHT));
 						break;}
 					break;
@@ -207,12 +234,12 @@ public class SokobanController {
 					// Break if stack is empty
 					if (move == null) break;
 					
+					// Move player
+					moveCharacter(move.getDirection(), false);
+
 					// Move block if pushed
 					if (move.isPush())
 						moveBlock(game.getBlock(move.getDirection()));
-					
-					// Move player
-					moveCharacter(move.getDirection());
 					break;
 				case "Z":
 					// Original move
@@ -224,13 +251,12 @@ public class SokobanController {
 					// Get direction of move to perform
 					Direction undoDirection = move.getDirection().getInverse();
 					
+					// Move player
+					moveCharacter(undoDirection, true);
+
 					// Move block if pushed
 					if (move.isPush())
 						moveBlock(game.getBlock(move.getDirection()));
-					
-					// Move player
-					moveCharacter(undoDirection);
-
 					break;
 				case "R":
 					System.out.println("Reset");
@@ -238,9 +264,12 @@ public class SokobanController {
 				}
 				
 				//Update GUI after move
-				update();				
+				update();			
+				System.out.printf("undoStack: %s\nredoStack: %s\n", game.undoStack, game.redoStack);
 		}});
 	}
+	
+	
 	
 	//Update GUI
 	private void update() {
@@ -273,7 +302,7 @@ public class SokobanController {
 		Cell tile = game.get(x, y);
 		
 		//Corresponding StackPane
-		ImageView baseImageView = new ImageView(new Image(getClass().getResourceAsStream("../icons/sokoban/Ground_Concrete.png")));
+		ImageView baseImageView = new ImageView(imageMap.get("Ground_Concrete.png"));
 		baseImageView.setFitHeight(tileSize);
 		baseImageView.setFitWidth(tileSize);
 
@@ -284,23 +313,23 @@ public class SokobanController {
 		//Set image based on grid values
 		switch (tile.toChar()) {
 		case Cell.WALL:
-			imageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Wall_Black.png")));
+			imageView.setImage(imageMap.get("Wall_Black.png"));
 			imageView.setFitHeight(tileSize);
 			imageView.setFitWidth(tileSize);
 			break;
 		case Cell.BLOCK_ENDPOINT:
-			imageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/CrateDark_Blue.png")));
+			imageView.setImage(imageMap.get("CrateDark_Blue.png"));
 			imageView.setFitHeight(tileSize);
 			imageView.setFitWidth(tileSize);
 			break;
 		case Cell.ENDPOINT:	
-			imageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/EndPoint_Blue.png")));
+			imageView.setImage(imageMap.get("EndPoint_Blue.png"));
 			imageView.setFitHeight(tileSize/3);
 			imageView.setFitWidth(tileSize/3);
 			break;
 		case Cell.EMPTY:
 			stackPane.getChildren().clear();
-			imageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Ground_Concrete.png")));
+			imageView.setImage(imageMap.get("Ground_Concrete.png"));
 			imageView.setFitHeight(tileSize);
 			imageView.setFitWidth(tileSize);
 			break;
@@ -311,6 +340,8 @@ public class SokobanController {
 		
 		stackPane.getChildren().add(imageView);
 	}
+	
+	
 	
 	//Load previous level
 	@FXML private void previousLevel() {
@@ -335,13 +366,14 @@ public class SokobanController {
 	}
 	
 	
+	
 	//Character rendering
 	private void renderCharacter() {
 		// Initialize character container
 		charPane = new StackPane();
 
 		// Initialize character ImageView and set properties
-		charImageView = new ImageView(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Front0.png")));
+		charImageView = new ImageView(imageMap.get("Character_Front0.png"));
 		charImageView.setFitHeight(tileSize*0.8);
 		charImageView.setFitWidth(tileSize*0.6);
 		
@@ -349,6 +381,7 @@ public class SokobanController {
 		charPane.setAlignment(Pos.CENTER);
 		charPane.setTranslateX(game.getPlayer().getX() * tileSize);
 		charPane.setTranslateY(game.getPlayer().getY() * tileSize);
+		charPane.setViewOrder(-1);
 		charPane.getChildren().setAll(charImageView);
 		
 		// Add character to gridPane
@@ -356,24 +389,34 @@ public class SokobanController {
 	}
 	
 	//Character movement
-	private void moveCharacter(Direction direction) {
+	private void moveCharacter(Direction direction, boolean moonWalk) {
+		// Change properties to perform moonwalk if requested
+		if (moonWalk) {
+			direction = direction.getInverse();
+			duration = 300;		
+			animationCycles = 2;
+		} else {
+			duration = 300;
+			animationCycles = 2;
+		}
+		
 		switch (direction) {
 		case UP:
-			charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Back0.png")));
+			charImageView.setImage(imageMap.get("Character_Back0.png"));
 			break;
 		case DOWN:
-			charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Front0.png")));
+			charImageView.setImage(imageMap.get("Character_Front0.png"));
 			break;
 		case LEFT:
-			charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Left0.png")));
+			charImageView.setImage(imageMap.get("Character_Left0.png"));
 			break;
 		case RIGHT:
-			charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Right0.png")));
+			charImageView.setImage(imageMap.get("Character_Right0.png"));
 			break;
 		}
 		
 		//Animation duration
-		duration = 300;
+		
 			
 		//Transition properties
 		TranslateTransition translateTransition = new TranslateTransition();
@@ -386,66 +429,49 @@ public class SokobanController {
 		//Play Transition
 		translateTransition.play();
 		
-		Timeline timeline = new Timeline();
 		switch (direction) {
 			case UP:
-			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration * 0.25),
-			        ae -> charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Back1.png")))));
-			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration * 0.5),
-					ae -> charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Back2.png")))));
-			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration * 0.75),
-					ae -> charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Back1.png")))));
-			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration * 1),
-					ae -> charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Back2.png")))));
+			image1 = imageMap.get("Character_Back1.png");
+			image2 = imageMap.get("Character_Back2.png");
 			break;
 			
 			case DOWN:
-			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration * 0.25),
-					ae -> charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Front1.png")))));
-			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration * 0.5),
-					ae -> charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Front2.png")))));
-			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration * 0.75),
-					ae -> charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Front1.png")))));
-			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration * 1),
-					ae -> charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Front2.png")))));
+			image1 = imageMap.get("Character_Front1.png");
+			image2 = imageMap.get("Character_Front2.png");
 			break;
 		
 			case LEFT:
-			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration * 0.25),
-					ae -> charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Left1.png")))));
-			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration * 0.5),
-					ae -> charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Left0.png")))));
-			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration * 0.75),
-					ae -> charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Left1.png")))));
-			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration * 1),
-					ae -> charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Left0.png")))));
+			image1 = imageMap.get("Character_Left1.png");
+			image2 = imageMap.get("Character_Left0.png");
 			break;
 
 			case RIGHT:
-			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration * 0.25),
-					ae -> charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Right1.png")))));
-			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration * 0.5),
-					ae -> charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Right0.png")))));
-			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration * 0.75),
-					ae -> charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Right1.png")))));
-			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration * 1),
-					ae -> charImageView.setImage(new Image(getClass().getResourceAsStream("../icons/sokoban/Character_Right0.png")))));
+			image1 = imageMap.get("Character_Right1.png");
+			image2 = imageMap.get("Character_Right0.png");
 			break;
+		}
+		
+		Timeline timeline = new Timeline();
+		for (int i = 0; i < animationCycles; i++) {
+			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration * (i + 0.5)/animationCycles),
+			        ae -> charImageView.setImage(image1)));
+			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration * (i + 1.0)/animationCycles),
+					ae -> charImageView.setImage(image2)));
 		}
 		
 		timeline.play();
 		
-		System.out.println(String.format("Player coords: [%s, %s] Pixel coords: [%s, %s]", 
-				game.getPlayer().getX(), game.getPlayer().getY(), charPane.getTranslateX(), charPane.getTranslateY()));
+//		System.out.println(String.format("Player coords: [%s, %s] Pixel coords: [%s, %s]", 
+//				game.getPlayer().getX(), game.getPlayer().getY(), charPane.getTranslateX(), charPane.getTranslateY()));
 	}
 
 	//Block rendering
 	private void renderBlocks() {
-		Image blockImage = new Image(getClass().getResourceAsStream("../icons/sokoban/Crate_Blue.png"));
+		// Local vars
+		ImageView blockImageView;
 		
 		// Render new image for each block in blockSet
 		for (Block block : game.getBlocks()) {
-			System.out.println(block);
 			// Initialize block container
 			StackPane blockPane = new StackPane();
 			
@@ -454,8 +480,13 @@ public class SokobanController {
 			blockPane.setTranslateX(block.getX() * tileSize);
 			blockPane.setTranslateY(block.getY() * tileSize);
 			
-			// Initialize and set ImageView properties
-			ImageView blockImageView = new ImageView(blockImage);
+			// Initialize ImageView based on block state
+			if (game.get(block.getX(), block.getY()).isEndpoint())
+				blockImageView = new ImageView(imageMap.get("CrateDark_Blue.png"));
+			else
+				blockImageView = new ImageView(imageMap.get("Crate_Blue.png"));
+			
+			// Set ImageView properties
 			blockImageView.setFitHeight(tileSize);
 			blockImageView.setFitWidth(tileSize);
 			
@@ -472,25 +503,41 @@ public class SokobanController {
 	
 	//Block movememnt
 	private void moveBlock(Block block) {
-		//Animation duration
-		duration = 300;
-		
-//		if (game.get(block.getX(), block.getY()).isEndpoint())
-//			getImageView(block)
+		//Local vars
+		TranslateTransition translateTransition;
+		Timeline timeline;
+		ImageView blockImageView;
 		
 		//Transition properties
-		TranslateTransition translateTransition = new TranslateTransition();
+		translateTransition = new TranslateTransition();
 		translateTransition.setNode(blockMap.get(block));
 		translateTransition.setToX(block.getX() * tileSize);
 		translateTransition.setToY(block.getY() * tileSize);
 		translateTransition.setInterpolator(Interpolator.EASE_BOTH);
 		translateTransition.setDuration(Duration.millis(duration));
-		
+
 		//Play Transition
 		translateTransition.play();
+		
+		//Setup timeline
+		timeline = new Timeline();
+		blockImageView = getImageView(blockMap.get(block));
+		
+		//Add actionEvents
+		if (game.get(block.getX(), block.getY()).isEndpoint())
+			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration),
+					ae -> blockImageView.setImage(imageMap.get("CrateDark_Blue.png"))));
+		else
+			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration),
+					ae -> blockImageView.setImage(imageMap.get("Crate_Blue.png"))));
+		
+		//Play timeline
+		timeline.play();
 	}
 	
-	//Returns corresponding ImageView if contained within node
+	
+	
+	//Returns ImageView if contained within node
 	private ImageView getImageView(Pane pane) {
 		return (ImageView) pane.getChildren()
 							.stream()
@@ -498,6 +545,8 @@ public class SokobanController {
 							.findFirst()
 							.get();
 	}
+	
+	
 	
 	//Handlers
 	@FXML
@@ -517,7 +566,7 @@ public class SokobanController {
     	// Launch file chooser and retrive selected file
     	File selectedFile = fileChooser.showOpenDialog(mainStage);
     	
-    	// File stream
+    	// File scanner
     	Scanner fileScanner = new Scanner(selectedFile);
     	
     	// Scan through file
@@ -528,10 +577,18 @@ public class SokobanController {
     	fileScanner.close();
     	
     	// Retrive level string
-    	String levelString = levelStringBuilder.toString();
+    	String rawString = levelStringBuilder.toString();
+    	
+    	// Separate level data 
+    	String[] rawArray = rawString.split(";");
+    	String levelString = rawArray[0];
+    	String levelCount = rawArray[1].substring(rawArray[1].indexOf(':') + 1).trim();
+    	String moveCount = rawArray[2].substring(rawArray[2].indexOf(':') + 1).trim();
     	
     	// Update current level
     	game = new Game(Levels.parseStr(levelString));
+    	level = Integer.valueOf(levelCount);
+    	game.getPlayer().setMoveCount(Integer.valueOf(moveCount));
     	customLevel = true;
     	
     	// Load new level
@@ -557,7 +614,7 @@ public class SokobanController {
     	PrintStream printStream = new PrintStream(new FileOutputStream(selectedFile));
     	
     	// Print game to file
-    	printStream.print(game);
+    	printStream.print(game + String.format("\n;Level:%s;Moves:%s", level, game.getPlayer().getMoveCount()));
     	
     	// Close stream
     	printStream.flush();
