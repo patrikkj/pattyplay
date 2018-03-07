@@ -11,17 +11,18 @@
 <?import javafx.scene.effect.Shadow?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<StackPane fx:id="rootPane" cache="true" cacheHint="SPEED" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="500.0" minWidth="660.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sokoban.SokobanController">
+<StackPane fx:id="rootPane" cache="true" cacheHint="SPEED" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="500.0" minWidth="600.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sokoban.SokobanController">
    <children>
       <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="500.0" minWidth="600.0" styleClass="backgroundColor" stylesheets="@../resources/stylesheet.css">
          <children>
             <HBox>
                <children>
-                  <JFXButton focusTraversable="false" onAction="#resetLevel" ripplerFill="#979797" text="Reset Level" textFill="#9e9e9e">
+                  <JFXButton focusTraversable="false" onAction="#resetLevel" ripplerFill="#979797" text="Reset" textFill="#9e9e9e">
                      <font>
                         <Font name="Gabriola" size="23.0" />
                      </font>
@@ -51,16 +52,14 @@
                         <String fx:value="buttonHoverColor" />
                      </styleClass>
                   </JFXButton>
-                  <Label fx:id="levelLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" styleClass="textColor" stylesheets="@../resources/stylesheet.css" text="Level: 100" textAlignment="CENTER" HBox.hgrow="ALWAYS">
+                  <Region HBox.hgrow="ALWAYS" />
+                  <Label fx:id="levelLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="82.0" styleClass="textColor" stylesheets="@../resources/stylesheet.css" text="Level: 100" textAlignment="CENTER" HBox.hgrow="ALWAYS">
                      <font>
                         <Font name="Gabriola" size="23.0" />
                      </font>
                      <HBox.margin>
-                        <Insets right="10.0" />
+                        <Insets />
                      </HBox.margin>
-                     <padding>
-                        <Insets left="20.0" />
-                     </padding>
                      <effect>
                         <SepiaTone>
                            <input>
@@ -76,7 +75,7 @@
                         </SepiaTone>
                      </effect>
                   </Label>
-                  <Label fx:id="movesLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="95.0" styleClass="textColor" stylesheets="@../resources/stylesheet.css" text="Moves: 100" textAlignment="CENTER">
+                  <Label fx:id="movesLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="-Infinity" prefWidth="82.0" styleClass="textColor" stylesheets="@../resources/stylesheet.css" text="Moves: 100" textAlignment="CENTER">
                      <font>
                         <Font name="Gabriola" size="23.0" />
                      </font>
@@ -95,9 +94,10 @@
                         </SepiaTone>
                      </effect>
                      <HBox.margin>
-                        <Insets left="10.0" />
+                        <Insets />
                      </HBox.margin>
                   </Label>
+                  <Region HBox.hgrow="ALWAYS" />
                   <JFXButton focusTraversable="false" onAction="#previousLevel" ripplerFill="#979797" text="Previous" textFill="#9e9e9e">
                      <font>
                         <Font name="Gabriola" size="23.0" />
