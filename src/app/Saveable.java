@@ -3,9 +3,6 @@ package app;
 import java.io.File;
 import java.io.FileNotFoundException;
 
-/**
- * 
- */
 public interface Saveable {
 	/**
 	 * Method for saving game state to file.
