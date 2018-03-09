@@ -83,17 +83,17 @@ public class SokobanController {
 		
 		// Render game graphics
 		renderGame();
-		
-		// Set labels
-		levelLabel.setText(String.format("Level: %s", game.getLevel()));
-		movesLabel.setText(String.format("Moves: %s", game.getMoveCount()));
 	}
 
-	// Renders game graphics
+	// Render game graphics
 	private void renderGame() {
 		initializeGrid();
 		renderCharacter();
 		renderBlocks();
+		
+		// Set labels
+		levelLabel.setText(String.format("Level: %s", game.getLevel()));
+		movesLabel.setText(String.format("Moves: %s", game.getMoveCount()));
 	}
 	
 	// Initialize GUI
