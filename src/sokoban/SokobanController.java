@@ -435,7 +435,7 @@ public class SokobanController {
 			timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration * (i + 1.0)/animationCycles),
 					ae -> charImageView.setImage(image2)));
 		}
-		
+
 		timeline.play();
 	}
 

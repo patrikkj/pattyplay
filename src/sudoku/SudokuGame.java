@@ -75,7 +75,7 @@ public class SudokuGame extends BoardGame<SudokuCell> {
 			for (int column = 0; column != getWidth(); column++)
 				set(row, column, new SudokuCell(row, column, initTable[row][column]));
 	}
-
+	
 	
 	//Validates row, column and update cell alerts
 	public void validateEntry(int row, int column) {
@@ -97,7 +97,7 @@ public class SudokuGame extends BoardGame<SudokuCell> {
 			compareList.add(cell.getValue());
 			cell.setRowAlert(false);
 		}
-		
+
 		for (SudokuCell cell : rowArray) {
 			char currentChar = cell.getValue();
 			int firstIndex = compareList.indexOf(currentChar);

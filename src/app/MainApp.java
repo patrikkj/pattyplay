@@ -51,7 +51,7 @@ public class MainApp extends Application {
 		primaryStage.getIcons().add(titleIcon);
 		primaryStage.show();
 	}
-
+	
 	public static void main(String[] args) {
 		launch(args);
 	}
