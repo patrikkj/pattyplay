@@ -1,7 +1,11 @@
 package sudoku;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import app.BoardGame;
 
@@ -33,7 +37,6 @@ public class SudokuGame extends BoardGame<SudokuCell> {
 		
 		setBoard(sudokuGrid);
 	}
-	
 	
 	
 	//Gets char value of SudokuCell at specified index
@@ -77,7 +80,7 @@ public class SudokuGame extends BoardGame<SudokuCell> {
 	}
 	
 	
-	//Validates row, column and update cell alerts
+	//Validates row, column, block and update cell alerts
 	public void validateEntry(int row, int column) {
 		validateRow(row);
 		validateColumn(column);
@@ -86,25 +89,20 @@ public class SudokuGame extends BoardGame<SudokuCell> {
 	
 	//Validates row and update cell alert
 	public void validateRow(int row) {
-		//Retrive corresponding Array
-		SudokuCell[] rowArray = getRowArray(row);
+		//Retrive cells within given row
+		SudokuCell[] rowCells = getRowArray(row);
 		
-		//Retrive corresponding ArrayList 
-		List<Character> compareList = new ArrayList<Character>();
+		//Convert cells to values
+		List<Character> rowValues = Arrays.stream(rowCells).map(cell -> cell.getValue()).collect(Collectors.toList());
 		
-		//Append character values to compareList
-		for (SudokuCell cell : rowArray) {
-			compareList.add(cell.getValue());
-			cell.setRowAlert(false);
-		}
-
-		for (SudokuCell cell : rowArray) {
-			char currentChar = cell.getValue();
-			int firstIndex = compareList.indexOf(currentChar);
-			int lastIndex = compareList.lastIndexOf(currentChar);
+		//Update row alerts
+		for (SudokuCell cell : rowCells) {
+			char value = cell.getValue();
 			
-			if ((firstIndex != lastIndex) &&  currentChar != EMPTY_CELL)
-				cell.setRowAlert(true);
+			int firstIndex = rowValues.indexOf(value);
+			int lastIndex = rowValues.lastIndexOf(value);
+			
+			cell.setRowAlert((firstIndex != lastIndex) &&  value != EMPTY_CELL);
 		}
 	}
 	

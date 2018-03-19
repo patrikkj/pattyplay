@@ -1,6 +1,6 @@
 package sudoku;
 
-public class SudokuCell {
+public class SudokuCell implements Comparable<SudokuCell>{
 	//instance variables
 	private char value;
 	private int row;
@@ -46,9 +46,9 @@ public class SudokuCell {
 	public boolean isColumnAlert() {return columnAlert;}
 	public boolean isBlockAlert() {return blockAlert;}
 	public boolean isAlerted() {
-		if (value == SudokuGame.EMPTY_CELL) {
+		if (value == SudokuGame.EMPTY_CELL)
 			return false;
-		}
+		
 		return (rowAlert || columnAlert || blockAlert) ? true : false;
 	}
 	
@@ -67,5 +67,10 @@ public class SudokuCell {
 	//Other
 	@Override
 	public String toString() {return String.valueOf(value);}
+
+	@Override
+	public int compareTo(SudokuCell cell) {
+		return Character.compare(value, cell.getValue());
+	}
 	
 }
