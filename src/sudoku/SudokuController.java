@@ -50,7 +50,6 @@ public class SudokuController {
 				
 				if (!game.getElement(rowIndex, columnIndex).isEditable())
 					button.setId("sudokuTilePermanent");
-
 			}
 		}
 		

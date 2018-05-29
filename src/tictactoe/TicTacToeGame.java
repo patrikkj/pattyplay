@@ -1,10 +1,11 @@
 package tictactoe;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import app.BoardGame;
 
-public class TicTacToeGame extends BoardGame<Character> {
+public class TicTacToeGame extends BoardGame<Character> implements GenericGridGame {
 	//Instance Variables
 	private int player1Score, player2Score, draws;
 	private char currentTurn;
@@ -13,6 +14,7 @@ public class TicTacToeGame extends BoardGame<Character> {
 	private Character[] rawWinSeq1 = new Character[] { PLAYER_1, PLAYER_1, PLAYER_1 };
 	private Character[] rawWinSeq2 = new Character[] { PLAYER_2, PLAYER_2, PLAYER_2 };
 	
+	private HashSet<GridListener> listeners = new HashSet<>();
 	
 	//Status codes
 	private static char PLAYER_1 = 'x', PLAYER_2 = 'o', FREE_CELL = '\0', DRAW = 'D', UNDECIDED = 'U';
@@ -155,6 +157,9 @@ public class TicTacToeGame extends BoardGame<Character> {
 		
 		//Change turn
 		currentTurn = (currentTurn == PLAYER_1) ? PLAYER_2 : PLAYER_1;
+		
+		//Alert listeners
+		listeners.forEach(e -> e.gridChanged(this, row, column, 1, 1));
 	}
 	
 	//Swaps starting player
@@ -193,21 +198,20 @@ public class TicTacToeGame extends BoardGame<Character> {
 		else if (gameStatus == PLAYER_1) player1Score++;
 		else if (gameStatus == PLAYER_2) player2Score++;
 	}
+
 	
 	
 	//Other
-	public static void main(String[] args) {
-		TicTacToeGame newGame = new TicTacToeGame();
-		
-		newGame.move(0, 0);
-		newGame.move(1, 1);
-		newGame.move(0, 1);
-		newGame.move(2, 0);
-		newGame.move(0, 2);
-		newGame.move(2, 2);
-		
-		System.out.println(newGame);
-		
+	@Override
+	public void addGridListener(GridListener listener) {
+		listeners.add(listener);
 	}
+	
+	@Override
+	public void removeGridListener(GridListener listener) {
+		listeners.remove(listener);
+	}
+
+
 	
 }
