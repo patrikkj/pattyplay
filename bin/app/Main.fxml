@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane fx:id="rootPane" cache="true" cacheHint="SPEED" styleClass="rootTransparency" stylesheets="@../resources/stylesheet.css" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.MainController">
+<AnchorPane fx:id="rootPane" cache="true" cacheHint="SPEED" styleClass="rootTransparency" stylesheets="@../resources/stylesheet.css" xmlns:fx="http://javafx.com/fxml/1" fx:controller="app.MainController">
    <children>
       <GridPane fx:id="menuGrid" alignment="CENTER" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" prefHeight="80.0" prefWidth="600.0" styleClass="menuColor" stylesheets="@../resources/stylesheet.css" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <columnConstraints>
